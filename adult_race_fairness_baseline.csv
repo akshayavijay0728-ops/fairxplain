@@ -1,0 +1,6 @@
+Group,Outcome_Rate,Outcome_Pct,Count,Disparity_Diff,Disparity_Ratio
+Asian-Pac-Islander,0.2656,26.56,1039,0.0248,1.1031
+White,0.2559,25.59,27816,0.0151,1.0625
+Black,0.1239,12.39,3124,-0.1169,0.5144
+Amer-Indian-Eskimo,0.1158,11.58,311,-0.1251,0.4807
+Other,0.0923,9.23,271,-0.1486,0.3831

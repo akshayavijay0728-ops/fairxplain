@@ -1,0 +1,7 @@
+Group,Outcome_Rate,Outcome_Pct,Count,Disparity_Diff,Disparity_Ratio
+African-American,0.5231,52.31,3175,0.068,1.1495
+Native American,0.4545,45.45,11,-0.0006,0.9987
+Caucasian,0.3909,39.09,2103,-0.0642,0.8588
+Hispanic,0.3713,37.13,509,-0.0838,0.8159
+Other,0.3615,36.15,343,-0.0936,0.7943
+Asian,0.2581,25.81,31,-0.1971,0.567

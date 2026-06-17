@@ -1,0 +1,44 @@
+{
+  "compas": {
+    "feature_cols": [
+      "age",
+      "charge_degree_enc",
+      "priors_count",
+      "days_b_screening_arrest",
+      "length_of_stay"
+    ],
+    "target": "two_year_recid",
+    "sensitive": [
+      "race",
+      "sex"
+    ],
+    "train_size": 4320,
+    "test_size": 1852,
+    "n_features": 5
+  },
+  "adult": {
+    "num_cols": [
+      "age",
+      "education_num",
+      "capital_gain",
+      "capital_loss",
+      "hours_per_week"
+    ],
+    "cat_cols": [
+      "workclass",
+      "education",
+      "marital_status",
+      "occupation",
+      "relationship",
+      "native_country"
+    ],
+    "total_features": 100,
+    "target": "income",
+    "sensitive": [
+      "race",
+      "sex"
+    ],
+    "train_size": 22792,
+    "test_size": 9769
+  }
+}

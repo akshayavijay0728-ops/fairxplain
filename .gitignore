@@ -1,0 +1,32 @@
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+*/.ipynb_checkpoints/
+.virtual_documents/
+
+# Generated datasets
+*cleaned.csv
+*_cleaned.csv
+*metrics.csv
+*_metrics.csv
+
+# Saved models and configs
+*.pkl
+*.json
+!preprocessing_metadata.json
+!best_models.json
+
+# IDE config files
+.vscode/
+.idea/
