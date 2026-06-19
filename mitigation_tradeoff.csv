@@ -1,5 +1,5 @@
 Strategy,Accuracy,F1,DP_Diff,EO_Diff
 Baseline,0.6744,0.6455,0.7273,1.0
 Reweighing,0.6739,0.6451,0.7273,1.0
-Exponentiated Gradient,0.5481,0.118,0.1818,0.6667
-Threshold Optimizer,0.6517,0.5035,0.3144,1.0
+Exponentiated Gradient,0.5421,0.1074,0.4691,0.6667
+Threshold Optimizer,0.6533,0.5062,0.2751,1.0

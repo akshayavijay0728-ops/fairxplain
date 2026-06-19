@@ -12,6 +12,40 @@ import os
 if sys.platform.startswith('win'):
     sys.stdout.reconfigure(encoding='utf-8')
 
+# Patch pandas Series integer indexing fallback for DoWhy
+try:
+    import pandas as pd
+    _old_getitem = pd.Series.__getitem__
+    def _new_getitem(self, key):
+        try:
+            return _old_getitem(self, key)
+        except KeyError as e:
+            if isinstance(key, int):
+                try:
+                    return self.iloc[key]
+                except IndexError:
+                    raise e
+            raise e
+    pd.Series.__getitem__ = _new_getitem
+except Exception as e:
+    print(f"Warning: Failed to patch pandas Series: {e}")
+
+# Patch for NetworkX 3.x compatibility with DoWhy
+try:
+    import networkx as nx
+    if not hasattr(nx, "d_separated"):
+        try:
+            from networkx.algorithms.d_separation import is_d_separator
+            nx.d_separated = is_d_separator
+            nx.algorithms.d_separated = is_d_separator
+        except ImportError:
+            from networkx.algorithms.d_separation import d_separated
+            nx.d_separated = d_separated
+            nx.algorithms.d_separated = d_separated
+except Exception as e:
+    print(f"Warning: Failed to patch networkx: {e}")
+
+
 
 # ======================================================================
 # check_package_dependencies

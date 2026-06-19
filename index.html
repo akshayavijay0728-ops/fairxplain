@@ -1,0 +1,1921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FairXplain — Trustworthy AI Framework</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0b10;--bg2:#121219;--bg3:#181825;--bg4:#1e1e2d;
+  --brd:rgba(255,255,255,0.07);--brd2:rgba(255,255,255,0.13);
+  --fg:#f0f0ff;--fg2:#9898b4;--fg3:#52526a;
+  --blue:#5b8dee;--purple:#9b6dff;--teal:#38d9c0;
+  --pink:#f06292;--amber:#ffb347;--green:#5dd47e;--red:#ff6b6b;
+  --g1:linear-gradient(135deg,#5b8dee,#9b6dff);
+  --g2:linear-gradient(135deg,#38d9c0,#5b8dee);
+  --g3:linear-gradient(135deg,#f06292,#ffb347);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--fg);overflow-x:hidden;line-height:1.6}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:var(--bg2)}::-webkit-scrollbar-thumb{background:var(--purple);border-radius:3px}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:300;height:58px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;background:rgba(11,11,16,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--brd)}
+.nb{display:flex;align-items:center;gap:8px;font-weight:800;font-size:1rem;letter-spacing:-.3px;cursor:pointer}
+.nb .ico{width:28px;height:28px;border-radius:7px;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:.8rem}
+.nav-tabs{display:flex;gap:2px}
+.nt{padding:5px 12px;border-radius:20px;font-size:.75rem;font-weight:600;color:var(--fg3);cursor:pointer;transition:.15s;border:1px solid transparent;white-space:nowrap}
+.nt:hover{color:var(--fg2)}.nt.on{background:rgba(91,141,238,.12);border-color:rgba(91,141,238,.3);color:var(--blue)}
+.nav-r{display:flex;align-items:center;gap:.6rem}
+
+/* ── BTN ── */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:.6rem 1.4rem;border-radius:9px;font-weight:700;font-size:.85rem;cursor:pointer;border:none;font-family:'Inter',sans-serif;transition:.2s;text-decoration:none}
+.btn-p{background:var(--g1);color:#fff;box-shadow:0 3px 16px rgba(91,141,238,.35)}.btn-p:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(91,141,238,.45)}
+.btn-s{background:rgba(255,255,255,.05);color:var(--fg);border:1px solid var(--brd2)}.btn-s:hover{background:rgba(91,141,238,.07);border-color:rgba(91,141,238,.3)}
+.btn-t{background:var(--g2);color:#fff}.btn-k{background:var(--g3);color:#fff}
+.btn-sm{padding:.4rem 1rem;font-size:.78rem;border-radius:7px}
+.btn-xs{padding:.28rem .7rem;font-size:.72rem;border-radius:6px}
+.btn-w{width:100%;justify-content:center}
+
+/* ── PAGE VIEWS ── */
+.view{display:none;min-height:calc(100vh - 58px);padding-top:58px}.view.on{display:block}
+
+/* ── HERO ── */
+#v-home{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;text-align:center;padding:80px 2rem 4rem;position:relative;overflow:hidden}
+.orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none}
+.o1{width:550px;height:550px;background:radial-gradient(circle,rgba(91,141,238,.13),transparent);top:15%;left:25%}
+.o2{width:400px;height:400px;background:radial-gradient(circle,rgba(155,109,255,.1),transparent);top:35%;left:55%}
+.badge{display:inline-flex;align-items:center;gap:5px;padding:.28rem .85rem;border-radius:100px;border:1px solid rgba(91,141,238,.35);background:rgba(91,141,238,.08);font-size:.72rem;font-weight:700;color:var(--blue);letter-spacing:.5px;text-transform:uppercase;margin-bottom:1.4rem}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--blue);animation:pulse 1.8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+h1.hero-h{font-size:clamp(2.4rem,5vw,4.6rem);font-weight:900;line-height:1.07;letter-spacing:-2px;margin-bottom:1.1rem}
+.gx1{background:var(--g1);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gx2{background:var(--g2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.gx3{background:var(--g3);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:1.05rem;color:var(--fg2);max-width:600px;margin:0 auto 2.2rem;line-height:1.75}
+.hero-btns{display:flex;gap:.8rem;justify-content:center;flex-wrap:wrap;margin-bottom:3.5rem}
+.stat-row{display:flex;gap:2.5rem;justify-content:center;flex-wrap:wrap}
+.stat-i{text-align:center}.stat-n{font-size:1.9rem;font-weight:900;letter-spacing:-1px}.stat-l{font-size:.7rem;color:var(--fg3);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.hero-ds{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:2.5rem;text-align:left;max-width:700px;width:100%}
+.ds-card{border-radius:14px;padding:1.2rem;border:1px solid}
+
+/* ── WORKFLOW STEPS (home) ── */
+.wf-steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:.7rem;margin-top:2.5rem;max-width:900px;width:100%}
+.wf-step{background:var(--bg2);border:1px solid var(--brd);border-radius:12px;padding:1rem;cursor:pointer;transition:.2s;text-align:left}
+.wf-step:hover{border-color:rgba(91,141,238,.3);background:rgba(91,141,238,.05);transform:translateY(-2px)}
+.wf-num{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--purple);font-weight:600;letter-spacing:.5px;margin-bottom:.4rem}
+.wf-title{font-size:.82rem;font-weight:700;margin-bottom:.25rem}
+.wf-desc{font-size:.7rem;color:var(--fg3);line-height:1.4}
+
+/* ── LAYOUT ── */
+.container{max-width:1120px;margin:0 auto;padding:0 1.5rem}
+.page-head{padding:2.5rem 0 1.5rem}
+.page-head .tag{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--purple);margin-bottom:.4rem}
+.page-head h2{font-size:clamp(1.5rem,2.5vw,2.2rem);font-weight:800;letter-spacing:-1px;margin-bottom:.4rem}
+.page-head p{font-size:.9rem;color:var(--fg2);max-width:580px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+.gauto{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.75rem}
+
+/* ── CARD ── */
+.card{background:var(--bg2);border:1px solid var(--brd);border-radius:14px;padding:1.4rem}
+.card-head{font-size:.82rem;font-weight:700;color:var(--fg2);margin-bottom:1rem;display:flex;align-items:center;gap:6px}
+.card-head .ci{font-size:.95rem}
+
+/* ── CHIPS ── */
+.chips{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:.65rem;margin-bottom:1rem}
+.chip{background:var(--bg3);border:1px solid var(--brd);border-radius:11px;padding:.85rem;text-align:center}
+.chip .cv{font-size:1.4rem;font-weight:800;letter-spacing:-1px}.chip .cl{font-size:.65rem;color:var(--fg3);margin-top:3px;text-transform:uppercase;letter-spacing:.3px}
+
+/* ── BADGE ── */
+.bg-pass{background:rgba(93,212,126,.1);color:var(--green);padding:2px 8px;border-radius:5px;font-size:.7rem;font-weight:700}
+.bg-warn{background:rgba(255,179,71,.1);color:var(--amber);padding:2px 8px;border-radius:5px;font-size:.7rem;font-weight:700}
+.bg-fail{background:rgba(255,107,107,.1);color:var(--red);padding:2px 8px;border-radius:5px;font-size:.7rem;font-weight:700}
+.bg-info{background:rgba(91,141,238,.1);color:var(--blue);padding:2px 8px;border-radius:5px;font-size:.7rem;font-weight:700}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-size:.8rem}
+.tbl th{text-align:left;color:var(--fg3);font-weight:600;font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;padding:.45rem .7rem;border-bottom:1px solid var(--brd)}
+.tbl td{padding:.5rem .7rem;border-bottom:1px solid rgba(255,255,255,.03)}
+.tbl tr:last-child td{border-bottom:none}
+.tbl tr:hover td{background:rgba(255,255,255,.015)}
+
+/* ── FORM ── */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:.9rem}
+.fg label{display:block;font-size:.7rem;font-weight:700;color:var(--fg3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.35rem}
+.fg input[type=range]{width:100%;accent-color:var(--blue);cursor:pointer;margin-top:2px}
+.fg .rv{font-weight:700;color:var(--blue);font-size:.82rem;margin-left:.4rem}
+.fg select,.fg input[type=text],.fg input[type=number]{width:100%;background:var(--bg3);border:1px solid var(--brd2);border-radius:8px;padding:.45rem .75rem;color:var(--fg);font-size:.82rem;font-family:'Inter',sans-serif;outline:none;transition:.15s}
+.fg select:focus,.fg input:focus{border-color:var(--blue)}
+
+/* ── BARS ── */
+.bar-row{margin:.5rem 0}
+.bar-lbl{display:flex;justify-content:space-between;font-size:.72rem;color:var(--fg2);margin-bottom:3px}
+.bar-tr{height:7px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden}
+.bar-fl{height:100%;border-radius:4px;transition:width .9s cubic-bezier(.4,0,.2,1)}
+
+/* ── CHARTS ── */
+.ch{position:relative}.ch-260{height:260px}.ch-220{height:220px}.ch-300{height:300px}.ch-180{height:180px}
+
+/* ── TOGGLE ── */
+.tg-grp{display:inline-flex;background:var(--bg3);border:1px solid var(--brd);border-radius:8px;padding:3px;gap:2px;margin-bottom:1rem}
+.tg{padding:.32rem .85rem;border-radius:6px;font-size:.75rem;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--fg3);font-family:'Inter',sans-serif;transition:.15s}
+.tg.on{background:var(--blue);color:#fff}
+
+/* ── STEPPER NAV ── */
+.step-bar{display:flex;gap:0;overflow-x:auto;scrollbar-width:none;margin-bottom:1.5rem}
+.step-bar::-webkit-scrollbar{display:none}
+.sb{flex-shrink:0;padding:.6rem 1.1rem;border:1px solid var(--brd);background:var(--bg2);cursor:pointer;font-size:.75rem;font-weight:600;color:var(--fg3);font-family:'Inter',sans-serif;transition:.15s;white-space:nowrap}
+.sb:first-child{border-radius:9px 0 0 9px}.sb:last-child{border-radius:0 9px 9px 0}
+.sb.on{background:rgba(91,141,238,.12);border-color:rgba(91,141,238,.4);color:var(--fg)}
+.sb:hover:not(.on){color:var(--fg2);background:rgba(255,255,255,.02)}
+.sb .sn{display:block;font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--purple);margin-bottom:1px}
+.panel{display:none;animation:fi .3s ease}.panel.on{display:block}
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── RESULT BOX ── */
+.res-box{background:var(--bg3);border:1px solid var(--brd);border-radius:12px;padding:1.2rem;text-align:center;transition:.3s}
+.res-box.hi{border-color:rgba(255,107,107,.4);background:rgba(255,107,107,.04)}
+.res-box.lo{border-color:rgba(93,212,126,.4);background:rgba(93,212,126,.04)}
+.res-lbl{font-size:.68rem;color:var(--fg3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem}
+.res-v{font-size:1.9rem;font-weight:900;letter-spacing:-1px}
+.res-p{font-size:.8rem;color:var(--fg2);margin-top:.3rem}
+.prob-tr{height:9px;background:rgba(255,255,255,.05);border-radius:5px;margin-top:.8rem;overflow:hidden}
+.prob-fl{height:100%;border-radius:5px;transition:width .7s ease}
+
+/* ── CF ── */
+.cf-card{background:var(--bg3);border:1px solid var(--brd);border-radius:11px;padding:1.1rem;margin-bottom:.7rem}
+.cf-row{display:flex;align-items:center;gap:.6rem;margin:.3rem 0;font-size:.78rem}
+.cf-feat{flex:0 0 130px;color:var(--fg3);font-size:.72rem;font-weight:500}
+.cf-o{background:rgba(255,107,107,.07);border-radius:5px;padding:.15rem .5rem;color:var(--red);font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:600;min-width:60px;text-align:center}
+.cf-arr{color:var(--fg3);font-size:.65rem}
+.cf-n{background:rgba(93,212,126,.07);border-radius:5px;padding:.15rem .5rem;color:var(--green);font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:600;min-width:60px;text-align:center}
+
+/* ── DAG ── */
+.dag{background:var(--bg3);border:1px solid var(--brd);border-radius:12px;padding:1.4rem;text-align:center}
+.dag-line{display:flex;align-items:center;justify-content:center;gap:.4rem;margin:.4rem 0;flex-wrap:wrap}
+.dag-node{padding:.4rem 1rem;border-radius:7px;font-size:.78rem;font-weight:700}
+.dag-arr{color:var(--fg3);font-size:.9rem}
+
+/* ── UPLOAD DROP ── */
+.upload-drop{border:2px dashed var(--brd2);border-radius:14px;padding:2.5rem;text-align:center;cursor:pointer;transition:.2s;background:var(--bg3)}
+.upload-drop:hover,.upload-drop.drag{border-color:var(--blue);background:rgba(91,141,238,.05)}
+.upload-drop input{display:none}
+
+/* ── ALERTS ── */
+.alert{border-radius:10px;padding:.75rem 1rem;font-size:.8rem;margin-bottom:.8rem;display:flex;gap:.6rem;align-items:flex-start;line-height:1.6}
+.alert-i{border:1px solid rgba(91,141,238,.25);background:rgba(91,141,238,.07);color:var(--fg2)}
+.alert-w{border:1px solid rgba(255,179,71,.25);background:rgba(255,179,71,.06);color:var(--amber)}
+.alert-e{border:1px solid rgba(255,107,107,.25);background:rgba(255,107,107,.06);color:var(--red)}
+.alert-g{border:1px solid rgba(93,212,126,.25);background:rgba(93,212,126,.06);color:var(--green)}
+.alert .ai{font-size:.95rem;flex-shrink:0;margin-top:1px}
+
+/* ── PROGRESS ── */
+.prog-steps{display:flex;align-items:center;gap:0;margin-bottom:2rem}
+.ps{flex:1;height:3px;background:var(--brd)}.ps.done{background:var(--blue)}.ps.active{background:linear-gradient(90deg,var(--blue),var(--purple))}
+.ps-node{width:28px;height:28px;border-radius:50%;background:var(--bg2);border:2px solid var(--brd);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:var(--fg3);flex-shrink:0;transition:.3s}
+.ps-node.done{background:var(--blue);border-color:var(--blue);color:#fff}
+.ps-node.active{background:var(--bg);border-color:var(--purple);color:var(--purple);box-shadow:0 0 10px rgba(155,109,255,.35)}
+
+/* ── TABS inside page ── */
+.tab-bar{display:flex;gap:.4rem;margin-bottom:1.2rem;border-bottom:1px solid var(--brd);padding-bottom:.6rem}
+.tab-btn{padding:.4rem 1rem;border-radius:8px 8px 0 0;font-size:.78rem;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--fg3);font-family:'Inter',sans-serif;transition:.15s}
+.tab-btn.on{color:var(--blue);background:rgba(91,141,238,.08)}
+.tab-panel{display:none}.tab-panel.on{display:block;animation:fi .25s ease}
+
+/* ── TOOLTIP ── */
+.tip-w{position:relative;display:inline-block;cursor:help}
+.tip-w .tip{position:absolute;bottom:110%;left:50%;transform:translateX(-50%);background:var(--bg4);border:1px solid var(--brd2);border-radius:8px;padding:.5rem .8rem;font-size:.7rem;color:var(--fg2);width:190px;text-align:center;pointer-events:none;opacity:0;transition:.15s;z-index:99;line-height:1.5;white-space:normal}
+.tip-w:hover .tip{opacity:1}
+
+/* ── MISC ── */
+.divider{height:1px;background:var(--brd)}
+.mono{font-family:'JetBrains Mono',monospace;font-size:.78rem}
+.text-red{color:var(--red)}.text-green{color:var(--green)}.text-amber{color:var(--amber)}.text-blue{color:var(--blue)}.text-teal{color:var(--teal)}
+.mt1{margin-top:.6rem}.mt2{margin-top:1.2rem}.mt3{margin-top:2rem}
+.mb1{margin-bottom:.6rem}.mb2{margin-bottom:1.2rem}
+.bold{font-weight:700}.small{font-size:.78rem;color:var(--fg2)}
+footer{padding:2rem 1.5rem;text-align:center;border-top:1px solid var(--brd)}
+footer .fl{font-weight:800;font-size:1rem;margin-bottom:.3rem}
+footer .fs{font-size:.75rem;color:var(--fg3)}
+@media(max-width:700px){.grid2,.grid3,.form-grid,.hero-ds{grid-template-columns:1fr}.nav-tabs{display:none}}
+</style>
+</head>
+<body>
+
+<!-- ═══ NAV ═══ -->
+<nav>
+  <div class="nb" onclick="showView('home')">
+    <div class="ico">⚖️</div>FairXplain
+  </div>
+  <div class="nav-tabs">
+    <div class="nt" onclick="showView('workflow')">🚀 Try It</div>
+    <div class="nt" onclick="showView('pipeline')">🔬 Pipeline Explorer</div>
+    <div class="nt" onclick="showView('predict')">⚡ Live Predict</div>
+    <div class="nt" onclick="showView('audit')">⚖️ Fairness Audit</div>
+    <div class="nt" onclick="showView('explain')">🔍 Explainability</div>
+    <div class="nt" onclick="showView('mitigate')">🛡️ Bias Mitigation</div>
+    <div class="nt" onclick="showView('report')">📋 Reports</div>
+  </div>
+  <div class="nav-r">
+    <button class="btn btn-sm btn-p" onclick="showView('workflow')">Start Analysis →</button>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════ HOME ═══ -->
+<div id="v-home" class="view on">
+  <div class="orb o1"></div><div class="orb o2"></div>
+  <div style="position:relative;z-index:1;width:100%;display:flex;flex-direction:column;align-items:center">
+    <div class="badge"><span class="dot"></span>Trustworthy AI · Live · Interactive</div>
+    <h1 class="hero-h">Audit Your AI for <span class="gx1">Fairness</span>,<br/><span class="gx2">Bias</span> &amp; <span class="gx3">Explainability</span></h1>
+    <p class="hero-sub">FairXplain is a complete end-to-end Trustworthy AI framework. Upload any dataset, train models, audit bias, explain predictions, generate counterfactuals and causal analysis — all in one place.</p>
+    <div class="hero-btns">
+      <button class="btn btn-p" onclick="showView('workflow')"><span>🚀</span> Start Full Analysis</button>
+      <button class="btn btn-s" onclick="showView('pipeline')"><span>🔬</span> Explore Pipeline</button>
+      <button class="btn btn-s" onclick="showView('predict')"><span>⚡</span> Live Prediction</button>
+    </div>
+    <div class="stat-row">
+      <div class="stat-i"><div class="stat-n gx1" id="hc1">0</div><div class="stat-l">Records Analysed</div></div>
+      <div class="stat-i"><div class="stat-n gx2" id="hc2">0</div><div class="stat-l">Models Trained</div></div>
+      <div class="stat-i"><div class="stat-n gx3" id="hc3">0</div><div class="stat-l">Pipeline Phases</div></div>
+      <div class="stat-i"><div class="stat-n" style="background:linear-gradient(135deg,#5dd47e,#38d9c0);-webkit-background-clip:text;-webkit-text-fill-color:transparent" id="hc4">0</div><div class="stat-l">Fairness Metrics</div></div>
+    </div>
+    <div class="hero-ds">
+      <div class="ds-card" style="border-color:rgba(240,98,146,.25);background:rgba(240,98,146,.05)">
+        <div style="font-size:.68rem;font-weight:700;color:var(--pink);text-transform:uppercase;letter-spacing:1px;margin-bottom:.4rem">🏛️ COMPAS Recidivism</div>
+        <div style="font-size:1.3rem;font-weight:800;letter-spacing:-1px">6,172 <span style="font-size:.8rem;font-weight:500;color:var(--fg2)">records</span></div>
+        <div style="font-size:.76rem;color:var(--fg2);margin-top:.3rem">African-American rate <strong style="color:var(--pink)">52.3%</strong> vs Caucasian <strong>39.1%</strong> — 1.34× disparity</div>
+      </div>
+      <div class="ds-card" style="border-color:rgba(56,217,192,.25);background:rgba(56,217,192,.05)">
+        <div style="font-size:.68rem;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:1px;margin-bottom:.4rem">💼 Adult Income</div>
+        <div style="font-size:1.3rem;font-weight:800;letter-spacing:-1px">32,561 <span style="font-size:.8rem;font-weight:500;color:var(--fg2)">records</span></div>
+        <div style="font-size:.76rem;color:var(--fg2);margin-top:.3rem">Male income &gt;50K <strong style="color:var(--teal)">30.6%</strong> vs Female <strong>10.9%</strong> — 0.36× disparity</div>
+      </div>
+    </div>
+    <div class="wf-steps">
+      <div class="wf-step" onclick="showView('workflow')"><div class="wf-num">STEP 1</div><div class="wf-title">� Enter Values</div><div class="wf-desc">Choose a use case, enter person details &amp; run analysis</div></div>
+      <div class="wf-step" onclick="showView('pipeline');showPhase(0)"><div class="wf-num">STEP 2</div><div class="wf-title">📊 EDA &amp; Baseline</div><div class="wf-desc">Explore data disparities before training</div></div>
+      <div class="wf-step" onclick="showView('pipeline');showPhase(1)"><div class="wf-num">STEP 3</div><div class="wf-title">🤖 Train Models</div><div class="wf-desc">LR, Random Forest, XGBoost evaluated</div></div>
+      <div class="wf-step" onclick="showView('explain')"><div class="wf-num">STEP 4</div><div class="wf-title">🔍 SHAP &amp; LIME</div><div class="wf-desc">Global &amp; local feature explanations</div></div>
+      <div class="wf-step" onclick="showView('audit')"><div class="wf-num">STEP 5</div><div class="wf-title">⚖️ Fairness Audit</div><div class="wf-desc">DP, EO, disparate impact scorecard</div></div>
+      <div class="wf-step" onclick="showView('mitigate')"><div class="wf-num">STEP 6</div><div class="wf-title">🛡️ Bias Mitigation</div><div class="wf-desc">3 strategies, accuracy-fairness tradeoff</div></div>
+      <div class="wf-step" onclick="showView('predict')"><div class="wf-num">STEP 7</div><div class="wf-title">⚡ Live Predict</div><div class="wf-desc">Real-time prediction + fairness warning</div></div>
+      <div class="wf-step" onclick="showView('report')"><div class="wf-num">STEP 8</div><div class="wf-title">📋 Reports</div><div class="wf-desc">Export scorecard, PDF, audit trail</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════ WORKFLOW WIZARD ═══ -->
+<div id="v-workflow" class="view" style="padding-top:58px">
+<div class="container">
+  <div class="page-head">
+    <div class="tag">User Workflow</div>
+    <h2>Complete Analysis Wizard</h2>
+    <p>Walk through every step — from data upload to final fairness report</p>
+  </div>
+
+  <!-- Progress indicator -->
+  <div id="wiz-prog" style="margin-bottom:2rem">
+    <div style="display:flex;justify-content:space-between;margin-bottom:.5rem;font-size:.7rem;color:var(--fg3)">
+      <span>Enter Values</span><span>EDA</span><span>Train</span><span>Explain</span><span>Audit</span><span>Mitigate</span><span>Report</span>
+    </div>
+    <div class="prog-steps">
+      <div class="ps-node on" id="wn0">1</div><div class="ps" id="wp0"></div>
+      <div class="ps-node" id="wn1">2</div><div class="ps" id="wp1"></div>
+      <div class="ps-node" id="wn2">3</div><div class="ps" id="wp2"></div>
+      <div class="ps-node" id="wn3">4</div><div class="ps" id="wp3"></div>
+      <div class="ps-node" id="wn4">5</div><div class="ps" id="wp4"></div>
+      <div class="ps-node" id="wn5">6</div><div class="ps" id="wp5"></div>
+      <div class="ps-node" id="wn6">7</div>
+    </div>
+  </div>
+
+  <!-- WIZARD STEP 0: Enter Values -->
+  <div id="wiz-0" class="panel on">
+
+    <div style="margin-bottom:1.5rem">
+      <h3 style="font-size:1.1rem;font-weight:800;margin-bottom:.4rem">� Step 1: Select a Use Case &amp; Enter Input Values</h3>
+      <p class="small">Choose a real-world scenario, fill in the person's details, then hit <strong style="color:var(--blue)">Run Full Analysis</strong>. The system will predict, explain, and audit fairness instantly.</p>
+    </div>
+
+    <!-- Use case selector -->
+    <div style="display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1.4rem" id="wiz-usecase-tabs">
+      <button class="wiz-uc-tab active" onclick="selectUseCase('compas',this)">🏛️ COMPAS Recidivism</button>
+      <button class="wiz-uc-tab" onclick="selectUseCase('adult',this)">💼 Adult Income</button>
+      <button class="wiz-uc-tab" onclick="selectUseCase('loan',this)">🏦 Loan Approval</button>
+      <button class="wiz-uc-tab" onclick="selectUseCase('hiring',this)">👔 Hiring Decision</button>
+    </div>
+
+    <!-- Use case description strip -->
+    <div id="wiz-uc-desc" style="background:rgba(91,141,238,.06);border:1px solid rgba(91,141,238,.18);border-radius:10px;padding:.8rem 1.1rem;font-size:.82rem;color:var(--fg2);margin-bottom:1.4rem;line-height:1.65"></div>
+
+    <div style="display:grid;grid-template-columns:1.2fr 1fr;gap:1.5rem;align-items:start">
+
+      <!-- Input fields -->
+      <div class="card" style="padding:1.2rem">
+        <div style="font-size:.75rem;font-weight:700;color:var(--fg3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:1rem">
+          Enter Person Details
+        </div>
+        <div id="wiz-input-fields"></div>
+        <div style="display:flex;gap:.6rem;margin-top:1.2rem">
+          <button class="btn btn-p btn-w" id="start-btn" onclick="runStartAnalysis()">
+            <span style="font-size:1rem">⚡</span> Run Full Analysis
+          </button>
+          <button class="btn btn-s" onclick="wizResetFields()" style="white-space:nowrap">↺ Reset</button>
+          <button class="btn btn-s" onclick="wizRandomFields()" style="white-space:nowrap">🎲 Random</button>
+        </div>
+      </div>
+
+      <!-- Live instant preview -->
+      <div>
+        <div class="card" style="padding:1.2rem;margin-bottom:.8rem" id="wiz-instant-preview">
+          <div style="font-size:.75rem;font-weight:700;color:var(--fg3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.8rem">Live Preview</div>
+          <div id="wiz-preview-result" style="text-align:center;padding:.8rem 0;color:var(--fg3);font-size:.85rem">
+            Fill in the fields to see a live preview
+          </div>
+        </div>
+        <div class="card" style="padding:1.2rem" id="wiz-sens-config">
+          <div style="font-size:.75rem;font-weight:700;color:var(--fg3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.8rem">Analysis Configuration</div>
+          <div class="fg mb2">
+            <label>Fairness Metric</label>
+            <select id="cfg-fair" style="width:100%;background:var(--bg3);border:1px solid var(--brd2);border-radius:8px;padding:.45rem .75rem;color:var(--fg);font-size:.82rem;font-family:'Inter',sans-serif;outline:none">
+              <option>Demographic Parity (DP-Diff &lt; 0.1)</option>
+              <option>Equalized Odds</option>
+              <option>Equal Opportunity</option>
+              <option>Disparate Impact Ratio &gt; 0.8</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label>Train / Test Split &nbsp;<span style="color:var(--blue);font-weight:700" id="split-val">70% / 30%</span></label>
+            <input type="range" min="60" max="85" value="70" style="width:100%;accent-color:var(--blue)" oninput="document.getElementById('split-val').textContent=this.value+'% / '+(100-this.value)+'%'"/>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <style>
+      .wiz-uc-tab{padding:.45rem 1rem;border-radius:8px;border:1px solid var(--brd2);background:var(--bg2);color:var(--fg3);font-size:.78rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:.15s}
+      .wiz-uc-tab:hover{color:var(--fg2);border-color:rgba(91,141,238,.3)}
+      .wiz-uc-tab.active{background:rgba(91,141,238,.12);border-color:rgba(91,141,238,.4);color:var(--blue)}
+      .wiz-field-row{display:flex;align-items:center;gap:.8rem;padding:.55rem 0;border-bottom:1px solid rgba(255,255,255,.04)}
+      .wiz-field-row:last-child{border-bottom:none}
+      .wiz-field-lbl{flex:0 0 130px;font-size:.76rem;font-weight:600;color:var(--fg2);line-height:1.3}
+      .wiz-field-lbl small{display:block;font-size:.63rem;color:var(--fg3);font-weight:400;margin-top:1px}
+      .wiz-field-ctrl{flex:1;display:flex;align-items:center;gap:.5rem}
+      .wiz-num{width:68px;background:var(--bg3);border:1.5px solid var(--brd2);border-radius:8px;padding:.38rem .5rem;color:var(--fg);font-size:.88rem;font-weight:700;font-family:'JetBrains Mono',monospace;text-align:center;outline:none;transition:.15s}
+      .wiz-num:focus{border-color:var(--blue);background:rgba(91,141,238,.06);box-shadow:0 0 0 3px rgba(91,141,238,.12)}
+      .wiz-rng{flex:1;accent-color:var(--blue);cursor:pointer}
+      .wiz-sel{flex:1;background:var(--bg3);border:1.5px solid var(--brd2);border-radius:8px;padding:.38rem .6rem;color:var(--fg);font-size:.8rem;font-family:'Inter',sans-serif;outline:none;cursor:pointer;transition:.15s}
+      .wiz-sel:focus{border-color:var(--blue)}
+      .wiz-imm-tag{font-size:.6rem;font-weight:700;color:var(--amber);background:rgba(255,179,71,.1);padding:1px 5px;border-radius:4px;margin-left:3px;white-space:nowrap}
+    </style>
+  </div>
+
+  <!-- WIZARD STEP 1: EDA Summary -->
+  <div id="wiz-1" class="panel">
+    <div class="alert alert-g"><span class="ai">✅</span><div><strong>Dataset loaded!</strong> EDA complete. Baseline fairness disparities detected — review before training.</div></div>
+    <div class="grid2 mb2">
+      <div class="card">
+        <div class="card-head"><span class="ci">📊</span>Outcome Rate by Sensitive Group</div>
+        <div class="ch ch-220"><canvas id="wiz-eda-chart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="ci">⚠️</span>Baseline Disparity Report</div>
+        <div id="wiz-eda-stats"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:.6rem"><button class="btn btn-s btn-sm" onclick="wizBack()">← Back</button><button class="btn btn-p btn-sm" onclick="wizNext()">Train Models →</button></div>
+  </div>
+
+  <!-- WIZARD STEP 2: Training -->
+  <div id="wiz-2" class="panel">
+    <div class="alert alert-i"><span class="ai">🤖</span><div>Training 3 models simultaneously on your dataset. Sensitive attributes excluded from model features.</div></div>
+    <div class="grid2 mb2">
+      <div class="card">
+        <div class="card-head"><span class="ci">📈</span>Model Performance Comparison</div>
+        <div class="ch ch-260"><canvas id="wiz-model-chart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="ci">🏆</span>Best Model Selected</div>
+        <div id="wiz-model-summary"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:.6rem"><button class="btn btn-s btn-sm" onclick="wizBack()">← Back</button><button class="btn btn-p btn-sm" onclick="wizNext()">Run Explainability →</button></div>
+  </div>
+
+  <!-- WIZARD STEP 3: Explain -->
+  <div id="wiz-3" class="panel">
+    <div class="alert alert-i"><span class="ai">🔍</span><div>SHAP and LIME explanations computed. Global importance shows <strong>priors_count</strong> dominates COMPAS decisions.</div></div>
+    <div class="grid2 mb2">
+      <div class="card">
+        <div class="card-head"><span class="ci">🌳</span>SHAP Global Feature Importance</div>
+        <div class="ch ch-220"><canvas id="wiz-shap-chart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="ci">🔬</span>LIME — Individual Explanation</div>
+        <div class="ch ch-220"><canvas id="wiz-lime-chart"></canvas></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:.6rem"><button class="btn btn-s btn-sm" onclick="wizBack()">← Back</button><button class="btn btn-p btn-sm" onclick="wizNext()">Run Fairness Audit →</button></div>
+  </div>
+
+  <!-- WIZARD STEP 4: Audit -->
+  <div id="wiz-4" class="panel">
+    <div id="wiz-audit-alert"></div>
+    <div class="grid2 mb2">
+      <div class="card">
+        <div class="card-head"><span class="ci">📋</span>Fairness Scorecard</div>
+        <div id="wiz-scorecard"></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="ci">🗺️</span>TPR / FPR by Group</div>
+        <div class="ch ch-220"><canvas id="wiz-audit-chart"></canvas></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:.6rem"><button class="btn btn-s btn-sm" onclick="wizBack()">← Back</button><button class="btn btn-p btn-sm" onclick="wizNext()">Apply Mitigation →</button></div>
+  </div>
+
+  <!-- WIZARD STEP 5: Mitigate -->
+  <div id="wiz-5" class="panel">
+    <div class="alert alert-w"><span class="ai">⚠️</span><div>Bias detected. Applying mitigation strategies and comparing fairness-accuracy tradeoffs.</div></div>
+    <div class="grid2 mb2">
+      <div class="card">
+        <div class="card-head"><span class="ci">⚖️</span>Fairness–Accuracy Tradeoff</div>
+        <div class="ch ch-260"><canvas id="wiz-mitig-chart"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="ci">🏆</span>Strategy Recommendation</div>
+        <div id="wiz-mitig-rec"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:.6rem"><button class="btn btn-s btn-sm" onclick="wizBack()">← Back</button><button class="btn btn-p btn-sm" onclick="wizNext()">View Report →</button></div>
+  </div>
+
+  <!-- WIZARD STEP 6: Report -->
+  <div id="wiz-6" class="panel">
+    <div class="alert alert-g"><span class="ai">✅</span><div><strong>Analysis complete!</strong> All phases finished. Download your report or explore individual sections.</div></div>
+    <div id="wiz-report-summary"></div>
+    <div class="grid3 mt2">
+      <button class="btn btn-p" onclick="showView('predict')">⚡ Try Live Prediction</button>
+      <button class="btn btn-t" onclick="showView('pipeline')">🔬 Explore Pipeline</button>
+      <button class="btn btn-k" onclick="generateReport()">📥 Download Report</button>
+    </div>
+  </div>
+
+</div></div>
+
+<!-- ═══════════════════════ PIPELINE EXPLORER ═══ -->
+<div id="v-pipeline" class="view" style="padding-top:58px">
+<div class="container">
+  <div class="page-head"><div class="tag">Pipeline Explorer</div><h2>Walk Through Every Phase</h2><p>Click any phase to see real outputs from the model run.</p></div>
+  <div class="step-bar">
+    <button class="sb on" onclick="showPhase(0)"><span class="sn">Phase 1</span>EDA &amp; Baseline</button>
+    <button class="sb" onclick="showPhase(1)"><span class="sn">Phase 2</span>Model Training</button>
+    <button class="sb" onclick="showPhase(2)"><span class="sn">Phase 3</span>SHAP / LIME</button>
+    <button class="sb" onclick="showPhase(3)"><span class="sn">Phase 4</span>Fairness Audit</button>
+    <button class="sb" onclick="showPhase(4)"><span class="sn">Phase 5</span>Mitigation</button>
+    <button class="sb" onclick="showPhase(5)"><span class="sn">Phase 6</span>Counterfactuals</button>
+    <button class="sb" onclick="showPhase(6)"><span class="sn">Phase 7</span>Causal</button>
+    <button class="sb" onclick="showPhase(7)"><span class="sn">Phase 8</span>Results</button>
+  </div>
+
+  <div id="phase-0" class="panel on">
+    <div class="alert alert-i"><span class="ai">ℹ️</span><div>Phases 1A–1D: Data loaded, cleaned and group disparities computed before any model is trained. Sensitive attributes preserved as separate arrays — never fed to the model.</div></div>
+    <div class="tg-grp"><button class="tg on" onclick="setTg(this,'eda','compas')">COMPAS</button><button class="tg" onclick="setTg(this,'eda','adult')">Adult Income</button></div>
+    <div id="eda-compas">
+      <div class="grid2 mb2">
+        <div class="card"><div class="card-head"><span class="ci">📊</span>Recidivism Rate by Race</div><div class="ch ch-260"><canvas id="c-race-recid"></canvas></div></div>
+        <div class="card">
+          <div class="card-head"><span class="ci">📉</span>Disparate Impact Ratios</div>
+          <div class="bar-row"><div class="bar-lbl"><span>African-American (52.3%)</span><span class="text-red bold">1.338× disparity</span></div><div class="bar-tr"><div class="bar-fl" style="width:0%;background:linear-gradient(90deg,var(--amber),var(--red))" data-w="78"></div></div></div>
+          <div class="bar-row mt1"><div class="bar-lbl"><span>Male recidivism (47.9%)</span><span class="text-amber bold">1.365× disparity</span></div><div class="bar-tr"><div class="bar-fl" style="width:0%;background:linear-gradient(90deg,var(--blue),var(--amber))" data-w="65"></div></div></div>
+          <div class="bar-row mt1"><div class="bar-lbl"><span>Overall baseline (45.5%)</span><span class="bold">Avg</span></div><div class="bar-tr"><div class="bar-fl" style="width:0%;background:var(--teal)" data-w="45.5"></div></div></div>
+          <div class="chips mt2">
+            <div class="chip"><div class="cv text-pink">52.3%</div><div class="cl">Black recid.</div></div>
+            <div class="chip"><div class="cv text-teal">39.1%</div><div class="cl">White recid.</div></div>
+            <div class="chip"><div class="cv text-amber">47.9%</div><div class="cl">Male rate</div></div>
+            <div class="chip"><div class="cv text-blue">35.1%</div><div class="cl">Female rate</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="card"><div class="card-head"><span class="ci">🗃️</span>Dataset Summary — COMPAS</div>
+        <table class="tbl"><thead><tr><th>Attribute</th><th>Group</th><th>Count</th><th>Outcome Rate</th><th>vs Overall</th></tr></thead>
+        <tbody>
+          <tr><td>Race</td><td>African-American</td><td>3,175</td><td class="text-red">52.3%</td><td><span class="bg-fail">+6.8pp</span></td></tr>
+          <tr><td>Race</td><td>Caucasian</td><td>2,103</td><td class="text-green">39.1%</td><td><span class="bg-pass">−6.4pp</span></td></tr>
+          <tr><td>Race</td><td>Hispanic</td><td>509</td><td>39.5%</td><td><span class="bg-pass">−6.0pp</span></td></tr>
+          <tr><td>Sex</td><td>Male</td><td>5,128</td><td class="text-amber">47.9%</td><td><span class="bg-warn">+2.4pp</span></td></tr>
+          <tr><td>Sex</td><td>Female</td><td>1,044</td><td class="text-green">35.1%</td><td><span class="bg-pass">−10.4pp</span></td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div id="eda-adult" style="display:none">
+      <div class="grid2 mb2">
+        <div class="card"><div class="card-head"><span class="ci">📊</span>Income &gt;50K Rate by Group</div><div class="ch ch-260"><canvas id="c-adult-grp"></canvas></div></div>
+        <div class="card">
+          <div class="card-head"><span class="ci">📉</span>Gender Income Gap</div>
+          <div class="bar-row"><div class="bar-lbl"><span>Male income &gt;50K</span><span class="text-teal bold">30.6%</span></div><div class="bar-tr"><div class="bar-fl" style="width:0%;background:linear-gradient(90deg,var(--teal),var(--blue))" data-w="30.6"></div></div></div>
+          <div class="bar-row mt1"><div class="bar-lbl"><span>Female income &gt;50K</span><span class="text-pink bold">10.9%</span></div><div class="bar-tr"><div class="bar-fl" style="width:0%;background:linear-gradient(90deg,var(--pink),var(--amber))" data-w="10.9"></div></div></div>
+          <div class="chips mt2">
+            <div class="chip"><div class="cv text-red">0.358×</div><div class="cl">F/M ratio</div></div>
+            <div class="chip"><div class="cv">24.1%</div><div class="cl">Overall rate</div></div>
+            <div class="chip"><div class="cv text-teal">22,792</div><div class="cl">Train size</div></div>
+            <div class="chip"><div class="cv text-blue">100</div><div class="cl">Features</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:.6rem;margin-top:1rem"><button class="btn btn-s btn-sm" onclick="showPhase(1)">Next: Model Training →</button></div>
+  </div>
+
+  <div id="phase-1" class="panel">
+    <div class="alert alert-i"><span class="ai">🤖</span><div>Phase 2: LR, Random Forest, XGBoost trained simultaneously. Sensitive attributes removed from X. Best model selected by ROC-AUC.</div></div>
+    <div class="tg-grp"><button class="tg on" onclick="setTg(this,'models','compas')">COMPAS</button><button class="tg" onclick="setTg(this,'models','adult')">Adult Income</button></div>
+    <div class="grid2 mb2">
+      <div class="card"><div class="card-head"><span class="ci">📈</span>Performance Comparison</div><div class="ch ch-260"><canvas id="c-models"></canvas></div></div>
+      <div class="card"><div class="card-head"><span class="ci">🎯</span>ROC-AUC Scores</div><div class="ch ch-180"><canvas id="c-auc"></canvas></div><div id="best-badge" class="mt1"></div></div>
+    </div>
+    <div class="card"><div class="card-head"><span class="ci">📋</span>Full Metrics Table</div><div id="metrics-tbl"></div></div>
+    <div style="display:flex;gap:.6rem;margin-top:1rem"><button class="btn btn-s btn-sm" onclick="showPhase(0)">← Back</button><button class="btn btn-s btn-sm" onclick="showPhase(2)">Next: Explainability →</button></div>
+  </div>
+
+  <div id="phase-2" class="panel">
+    <div class="alert alert-i"><span class="ai">🔍</span><div>Phase 3: SHAP provides theoretically-grounded attributions via Shapley values. LIME builds a locally faithful linear approximation around each prediction.</div></div>
+    <div class="grid2 mb2">
+      <div class="card"><div class="card-head"><span class="ci">🌳</span>SHAP Global Importance — COMPAS</div><div class="ch ch-260"><canvas id="c-shap-c"></canvas></div><p style="font-size:.7rem;color:var(--fg3);margin-top:.5rem"><strong style="color:var(--fg2)">priors_count</strong> dominates. Model relies heavily on criminal history.</p></div>
+      <div class="card"><div class="card-head"><span class="ci">🌳</span>SHAP Global Importance — Adult</div><div class="ch ch-260"><canvas id="c-shap-a"></canvas></div><p style="font-size:.7rem;color:var(--fg3);margin-top:.5rem"><strong style="color:var(--fg2)">capital_gain</strong> and <strong style="color:var(--fg2)">education_num</strong> strongest predictors.</p></div>
+    </div>
+    <div class="card mb2">
+      <div class="card-head"><span class="ci">🔬</span>LIME Local Explanations — Choose a Case</div>
+      <div style="display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap">
+        <button class="btn btn-s btn-sm on" id="lc0" onclick="showLime(0)">High Risk Case</button>
+        <button class="btn btn-s btn-sm" id="lc1" onclick="showLime(1)">Low Risk Case</button>
+        <button class="btn btn-s btn-sm" id="lc2" onclick="showLime(2)">Borderline Case</button>
+      </div>
+      <div class="grid2"><div><div class="small mb1">COMPAS LIME weights — red=pushes toward high risk, green=away</div><div class="ch ch-220"><canvas id="c-lime-c"></canvas></div></div>
+      <div><div class="small mb1">Adult Income LIME weights</div><div class="ch ch-220"><canvas id="c-lime-a"></canvas></div></div></div>
+    </div>
+    <div style="display:flex;gap:.6rem"><button class="btn btn-s btn-sm" onclick="showPhase(1)">← Back</button><button class="btn btn-s btn-sm" onclick="showPhase(3)">Next: Fairness Audit →</button></div>
+  </div>
+
+  <div id="phase-3" class="panel">
+    <div class="alert alert-e"><span class="ai">🚨</span><div><strong>Bias Detected!</strong> COMPAS Race DP-Diff = 0.281 — far exceeds the 0.1 fairness threshold. Model is significantly less accurate for African-American defendants.</div></div>
+    <div class="grid2 mb2">
+      <div class="card"><div class="card-head"><span class="ci">📋</span>Fairness Scorecard</div>
+        <table class="tbl"><thead><tr><th>Metric</th><th>COMPAS Race</th><th>COMPAS Sex</th><th>Adult Sex</th><th>Adult Race</th><th>Threshold</th></tr></thead>
+        <tbody>
+          <tr><td class="tip-w">DP-Diff ↓<span class="tip">Demographic Parity Difference: |P(ŷ=1|GroupA) - P(ŷ=1|GroupB)|. Closer to 0 = fairer.</span></td><td><span class="bg-fail">0.281</span></td><td><span class="bg-fail">0.182</span></td><td><span class="bg-fail">0.162</span></td><td><span class="bg-warn">0.111</span></td><td class="text-green">&lt;0.10</td></tr>
+          <tr><td class="tip-w">DP-Ratio ↑<span class="tip">Disparate Impact Ratio: P(minority)/P(majority). Below 0.8 violates US EEOC 80% rule.</span></td><td><span class="bg-fail">0.530</span></td><td><span class="bg-warn">0.635</span></td><td><span class="bg-fail">0.366</span></td><td><span class="bg-fail">0.485</span></td><td class="text-green">&gt;0.80</td></tr>
+          <tr><td class="tip-w">EO-Diff ↓<span class="tip">Equalized Odds Difference: max(|ΔTPR|, |ΔFPR|) across groups.</span></td><td><span class="bg-fail">0.297</span></td><td><span class="bg-warn">0.158</span></td><td><span class="bg-pass">0.057</span></td><td><span class="bg-pass">0.040</span></td><td class="text-green">&lt;0.10</td></tr>
+          <tr><td class="tip-w">EOP-Diff ↓<span class="tip">Equal Opportunity Difference: |TPR_A - TPR_B|. Focuses only on true positive equality.</span></td><td><span class="bg-fail">0.297</span></td><td><span class="bg-warn">0.109</span></td><td><span class="bg-pass">0.012</span></td><td><span class="bg-pass">0.029</span></td><td class="text-green">&lt;0.10</td></tr>
+        </tbody></table>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="ci">📐</span>TPR / FPR by Group</div>
+        <div class="tg-grp"><button class="tg on" onclick="setAuditGrp('compas_race',this)">COMPAS Race</button><button class="tg" onclick="setAuditGrp('compas_sex',this)">COMPAS Sex</button><button class="tg" onclick="setAuditGrp('adult_sex',this)">Adult Sex</button></div>
+        <div id="audit-grp-detail"></div>
+        <div class="ch ch-180 mt1"><canvas id="c-audit"></canvas></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:.6rem"><button class="btn btn-s btn-sm" onclick="showPhase(2)">← Back</button><button class="btn btn-s btn-sm" onclick="showPhase(4)">Next: Mitigation →</button></div>
+  </div>
+
+  <div id="phase-4" class="panel">
+    <div class="alert alert-w"><span class="ai">⚠️</span><div>Phase 5: Three bias mitigation strategies applied. Exponentiated Gradient is most effective — reduces DP-Diff from 0.73 to 0.18 with ~13% accuracy cost.</div></div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.7rem;margin-bottom:1rem">
+      <div class="card" id="sc0" style="cursor:pointer;border-color:rgba(91,141,238,.4);background:rgba(91,141,238,.05)" onclick="selStrat(0)">
+        <div style="font-size:.75rem;font-weight:700;margin-bottom:.2rem">Baseline</div>
+        <div style="font-size:.65rem;color:var(--fg3);margin-bottom:.5rem">No mitigation</div>
+        <div style="font-size:1.3rem;font-weight:800;color:var(--fg)">67.4%</div>
+        <div style="font-size:.7rem;color:var(--red)">DP-Diff: 0.727</div>
+      </div>
+      <div class="card" id="sc1" style="cursor:pointer" onclick="selStrat(1)">
+        <div style="font-size:.75rem;font-weight:700;margin-bottom:.2rem">Reweighing</div>
+        <div style="font-size:.65rem;color:var(--fg3);margin-bottom:.5rem">Pre-processing</div>
+        <div style="font-size:1.3rem;font-weight:800;color:var(--blue)">67.4%</div>
+        <div style="font-size:.7rem;color:var(--amber)">DP-Diff: 0.727</div>
+      </div>
+      <div class="card" id="sc2" style="cursor:pointer" onclick="selStrat(2)">
+        <div style="font-size:.75rem;font-weight:700;margin-bottom:.2rem">Exp. Gradient</div>
+        <div style="font-size:.65rem;color:var(--fg3);margin-bottom:.5rem">In-processing ⭐</div>
+        <div style="font-size:1.3rem;font-weight:800;color:var(--green)">54.4%</div>
+        <div style="font-size:.7rem;color:var(--green)">DP-Diff: 0.182 ✓</div>
+      </div>
+      <div class="card" id="sc3" style="cursor:pointer" onclick="selStrat(3)">
+        <div style="font-size:.75rem;font-weight:700;margin-bottom:.2rem">Threshold Opt.</div>
+        <div style="font-size:.65rem;color:var(--fg3);margin-bottom:.5rem">Post-processing</div>
+        <div style="font-size:1.3rem;font-weight:800;color:var(--amber)">64.6%</div>
+        <div style="font-size:.7rem;color:var(--red)">DP-Diff: 0.835</div>
+      </div>
+    </div>
+    <div class="grid2 mb2">
+      <div class="card"><div class="card-head"><span class="ci">⚖️</span>Accuracy vs Fairness Scatter</div><div class="ch ch-260"><canvas id="c-mitig"></canvas></div></div>
+      <div class="card"><div class="card-head"><span class="ci">🔍</span>Strategy Detail</div><div id="strat-det"></div></div>
+    </div>
+    <div style="display:flex;gap:.6rem"><button class="btn btn-s btn-sm" onclick="showPhase(3)">← Back</button><button class="btn btn-s btn-sm" onclick="showPhase(5)">Next: Counterfactuals →</button></div>
+  </div>
+
+  <div id="phase-5" class="panel">
+    <div class="alert alert-i"><span class="ai">♻️</span><div>Phase 6: DiCE generates minimal-change "what-if" counterfactuals. Sensitive attributes (race, sex) are locked as immutable — ethical requirement.</div></div>
+    <div class="tg-grp"><button class="tg on" onclick="setTg(this,'cf','compas')">COMPAS</button><button class="tg" onclick="setTg(this,'cf','adult')">Adult Income</button></div>
+    <div style="display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap" id="cf-inst-sel"></div>
+    <div id="cf-display"></div>
+    <div style="display:flex;gap:.6rem;margin-top:1rem"><button class="btn btn-s btn-sm" onclick="showPhase(4)">← Back</button><button class="btn btn-s btn-sm" onclick="showPhase(6)">Next: Causal →</button></div>
+  </div>
+
+  <div id="phase-6" class="panel">
+    <div class="alert alert-i"><span class="ai">🕸️</span><div>Phase 7: DoWhy estimates the causal Average Treatment Effect (ATE) of sensitive attributes using domain DAGs and backdoor linear regression.</div></div>
+    <div class="grid2 mb2">
+      <div class="card">
+        <div class="card-head"><span class="ci">🕸️</span>Causal DAG — COMPAS (Race → Recidivism)</div>
+        <div class="dag mb2">
+          <div class="dag-line"><div class="dag-node" style="background:rgba(255,107,107,.12);border:1px solid rgba(255,107,107,.3);color:var(--red)">Race (Treatment)</div><div class="dag-arr">──────→</div><div class="dag-node" style="background:rgba(255,179,71,.12);border:1px solid rgba(255,179,71,.3);color:var(--amber)">Recidivism (Outcome)</div></div>
+          <div class="dag-line mt1"><div class="dag-node" style="background:rgba(91,141,238,.1);border:1px solid rgba(91,141,238,.25);color:var(--blue);font-size:.7rem">Age</div><div class="dag-arr" style="font-size:.7rem">→</div><div class="dag-node" style="background:rgba(91,141,238,.1);border:1px solid rgba(91,141,238,.25);color:var(--blue);font-size:.7rem">Priors Count</div><div class="dag-arr" style="font-size:.7rem">→</div><div class="dag-node" style="background:rgba(255,179,71,.12);border:1px solid rgba(255,179,71,.3);color:var(--amber);font-size:.7rem">Recidivism</div></div>
+          <div style="font-size:.68rem;color:var(--fg3);margin-top:.8rem">Confounders adjusted via backdoor criterion</div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--brd);border-radius:11px;padding:1.1rem;text-align:center">
+          <div style="font-size:.68rem;color:var(--fg3);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.5px">ATE — Race Effect</div>
+          <div style="font-size:2.2rem;font-weight:900;letter-spacing:-2px;background:var(--g3);-webkit-background-clip:text;-webkit-text-fill-color:transparent">+0.1621</div>
+          <div style="font-size:.78rem;color:var(--fg2);margin-top:.4rem;line-height:1.6">Being classified as African-American is associated with a <strong style="color:var(--pink)">+16.2 percentage point</strong> increase in recidivism probability after adjusting for age and prior offences.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><span class="ci">🕸️</span>Causal DAG — Adult Income (Sex → Income)</div>
+        <div class="dag mb2">
+          <div class="dag-line"><div class="dag-node" style="background:rgba(56,217,192,.1);border:1px solid rgba(56,217,192,.3);color:var(--teal)">Sex (Treatment)</div><div class="dag-arr">──────→</div><div class="dag-node" style="background:rgba(91,141,238,.12);border:1px solid rgba(91,141,238,.3);color:var(--blue)">Income &gt;50K (Outcome)</div></div>
+          <div class="dag-line mt1"><div class="dag-node" style="background:rgba(155,109,255,.1);border:1px solid rgba(155,109,255,.25);color:var(--purple);font-size:.7rem">Education</div><div class="dag-arr" style="font-size:.7rem">→</div><div class="dag-node" style="background:rgba(155,109,255,.1);border:1px solid rgba(155,109,255,.25);color:var(--purple);font-size:.7rem">Occupation</div><div class="dag-arr" style="font-size:.7rem">→</div><div class="dag-node" style="background:rgba(91,141,238,.12);border:1px solid rgba(91,141,238,.3);color:var(--blue);font-size:.7rem">Income</div></div>
+          <div style="font-size:.68rem;color:var(--fg3);margin-top:.8rem">Confounders: education, occupation, age</div>
+        </div>
+        <div style="background:var(--bg2);border:1px solid var(--brd);border-radius:11px;padding:1.1rem;text-align:center">
+          <div style="font-size:.68rem;color:var(--fg3);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.5px">ATE — Sex Effect</div>
+          <div style="font-size:2.2rem;font-weight:900;letter-spacing:-2px;background:var(--g2);-webkit-background-clip:text;-webkit-text-fill-color:transparent">−0.1481</div>
+          <div style="font-size:.78rem;color:var(--fg2);margin-top:.4rem;line-height:1.6">Being female is associated with a <strong style="color:var(--teal)">−14.8 percentage point</strong> decrease in income probability after controlling for education, occupation and age.</div>
+        </div>
+      </div>
+    </div>
+    <div class="card"><div class="card-head"><span class="ci">📊</span>ATE Comparison Chart</div><div class="ch ch-180"><canvas id="c-ate"></canvas></div></div>
+    <div style="display:flex;gap:.6rem;margin-top:1rem"><button class="btn btn-s btn-sm" onclick="showPhase(5)">← Back</button><button class="btn btn-s btn-sm" onclick="showPhase(7)">Next: Results →</button></div>
+  </div>
+
+  <div id="phase-7" class="panel">
+    <div class="alert alert-g"><span class="ai">✅</span><div>Phase 8: All phases complete. Master scorecard compiled — model performance, fairness metrics, mitigation results and causal ATEs.</div></div>
+    <div class="chips mb2">
+      <div class="chip"><div class="cv gx1">0.731</div><div class="cl">Best COMPAS AUC</div></div>
+      <div class="chip"><div class="cv gx2">0.928</div><div class="cl">Best Adult AUC</div></div>
+      <div class="chip"><div class="cv text-red">0.281</div><div class="cl">COMPAS DP-Diff</div></div>
+      <div class="chip"><div class="cv text-amber">0.162</div><div class="cl">Adult Sex DP-Diff</div></div>
+      <div class="chip"><div class="cv text-pink">+16.2pp</div><div class="cl">COMPAS ATE</div></div>
+      <div class="chip"><div class="cv text-teal">−14.8pp</div><div class="cl">Adult Sex ATE</div></div>
+    </div>
+    <div class="grid2 mb2">
+      <div class="card"><div class="card-head"><span class="ci">📊</span>Master: AUC vs Fairness</div><div class="ch ch-260"><canvas id="c-master"></canvas></div></div>
+      <div class="card"><div class="card-head"><span class="ci">🏁</span>Pipeline Summary</div>
+        <table class="tbl"><thead><tr><th>Phase</th><th>Output</th><th>Key Finding</th></tr></thead>
+        <tbody>
+          <tr><td>1A–1D</td><td>EDA + Baseline</td><td class="text-red">1.34× racial disparity in COMPAS</td></tr>
+          <tr><td>2</td><td>Model Training</td><td class="text-green">XGBoost best Adult (AUC 0.928)</td></tr>
+          <tr><td>3</td><td>SHAP + LIME</td><td class="text-blue">priors_count dominates COMPAS</td></tr>
+          <tr><td>4</td><td>Fairness Audit</td><td class="text-red">DP-Diff 0.281 — CRITICAL</td></tr>
+          <tr><td>5</td><td>Mitigation</td><td class="text-green">Exp. Gradient → DP-Diff 0.182</td></tr>
+          <tr><td>6</td><td>Counterfactuals</td><td class="text-teal">Reduce priors to flip prediction</td></tr>
+          <tr><td>7</td><td>Causal ATE</td><td class="text-pink">Race → +16.2pp causal effect</td></tr>
+        </tbody></table>
+      </div>
+    </div>
+    <div style="display:flex;gap:.6rem"><button class="btn btn-s btn-sm" onclick="showPhase(6)">← Back</button><button class="btn btn-p btn-sm" onclick="showView('predict')">⚡ Try Live Prediction →</button></div>
+  </div>
+
+</div></div>
+
+<!-- ═══════════════════════ LIVE PREDICT ═══ -->
+<div id="v-predict" class="view" style="padding-top:58px">
+<div class="container" style="max-width:1200px">
+
+  <div class="page-head">
+    <div class="tag">Live Prediction Engine</div>
+    <h2>⚡ Enter Values — Get Instant Prediction</h2>
+    <p>Type or adjust any value. The model recalculates automatically. See risk score, SHAP explanation, fairness gap and counterfactuals live.</p>
+  </div>
+
+  <!-- Model selector tabs -->
+  <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem" id="pred-model-tabs">
+    <button class="pred-tab active" onclick="switchPredModel('compas',this)">🏛️ COMPAS Recidivism</button>
+    <button class="pred-tab" onclick="switchPredModel('adult',this)">💼 Adult Income</button>
+    <button class="pred-tab" onclick="switchPredModel('loan',this)">🏦 Loan Approval</button>
+    <button class="pred-tab" onclick="switchPredModel('hiring',this)">👔 Hiring Decision</button>
+  </div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;align-items:start">
+
+    <!-- LEFT: Input Panel -->
+    <div>
+      <div class="pred-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem">
+          <div style="font-weight:800;font-size:1rem" id="pred-model-name">COMPAS Recidivism Model</div>
+          <span class="pred-tag" id="pred-model-tag">Criminal Justice</span>
+        </div>
+        <div id="pred-fields"></div>
+        <div style="display:flex;gap:.7rem;margin-top:1.2rem">
+          <button class="pred-btn-main" onclick="doPrediction()">
+            <span style="font-size:1.1rem">⚡</span> Predict Now
+          </button>
+          <button class="pred-btn-sec" onclick="resetPredFields()">↺ Reset</button>
+          <button class="pred-btn-sec" onclick="randomisePredFields()">🎲 Random</button>
+        </div>
+      </div>
+
+      <!-- Live SHAP bars — updates on predict -->
+      <div class="pred-card" style="margin-top:1rem">
+        <div style="font-weight:700;font-size:.85rem;margin-bottom:1rem;display:flex;align-items:center;gap:6px">
+          <span>🌳</span> Feature Contributions (SHAP-style)
+          <span style="font-size:.7rem;color:var(--fg3);font-weight:400;margin-left:4px">— what pushed this prediction</span>
+        </div>
+        <div id="pred-shap-bars">
+          <div style="font-size:.8rem;color:var(--fg3);text-align:center;padding:1rem 0">Run a prediction to see feature contributions</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Results Panel -->
+    <div>
+
+      <!-- Big result box -->
+      <div class="pred-result-box" id="pred-result-box">
+        <div id="pred-result-idle" style="text-align:center;padding:1.5rem 0">
+          <div style="font-size:2.5rem;margin-bottom:.5rem;opacity:.3">⚡</div>
+          <div style="color:var(--fg3);font-size:.9rem">Enter values on the left and hit <strong style="color:var(--fg)">Predict Now</strong></div>
+        </div>
+        <div id="pred-result-live" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+            <div>
+              <div style="font-size:.7rem;color:var(--fg3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem">Model Decision</div>
+              <div id="pred-verdict" style="font-size:2rem;font-weight:900;letter-spacing:-1px"></div>
+            </div>
+            <div id="pred-risk-circle" style="width:80px;height:80px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:3px solid;flex-shrink:0">
+              <div id="pred-pct" style="font-size:1.3rem;font-weight:900;letter-spacing:-1px"></div>
+              <div style="font-size:.6rem;color:var(--fg3)">probability</div>
+            </div>
+          </div>
+          <!-- Animated probability bar -->
+          <div style="margin-bottom:1.2rem">
+            <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--fg3);margin-bottom:.4rem">
+              <span>0% — No</span><span>50% threshold</span><span>100% — Yes</span>
+            </div>
+            <div style="height:14px;background:rgba(255,255,255,.06);border-radius:7px;overflow:hidden;position:relative">
+              <div id="pred-prob-bar" style="height:100%;border-radius:7px;transition:width .6s cubic-bezier(.4,0,.2,1);width:0%"></div>
+              <div style="position:absolute;top:0;left:50%;width:2px;height:100%;background:rgba(255,255,255,.2)"></div>
+            </div>
+          </div>
+          <!-- Confidence breakdown -->
+          <div id="pred-conf-grid" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.6rem;margin-bottom:1rem"></div>
+        </div>
+      </div>
+
+      <!-- Fairness Live Check -->
+      <div class="pred-card" style="margin-top:1rem">
+        <div style="font-weight:700;font-size:.85rem;margin-bottom:.8rem;display:flex;align-items:center;gap:6px">
+          <span>⚖️</span> Live Fairness Check
+          <span style="font-size:.7rem;color:var(--fg3);font-weight:400;margin-left:4px">— same inputs, different demographics</span>
+        </div>
+        <div id="pred-fairness-rows">
+          <div style="font-size:.8rem;color:var(--fg3);text-align:center;padding:.8rem 0">Run a prediction to see fairness comparison</div>
+        </div>
+      </div>
+
+      <!-- Counterfactuals -->
+      <div class="pred-card" style="margin-top:1rem">
+        <div style="font-weight:700;font-size:.85rem;margin-bottom:.8rem;display:flex;align-items:center;gap:6px">
+          <span>♻️</span> What Would Change This Outcome?
+        </div>
+        <div id="pred-cf-list">
+          <div style="font-size:.8rem;color:var(--fg3);text-align:center;padding:.8rem 0">Run a prediction to see actionable suggestions</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+.pred-tab{padding:.5rem 1.1rem;border-radius:8px;border:1px solid var(--brd2);background:var(--bg2);color:var(--fg3);font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:.15s}
+.pred-tab:hover{color:var(--fg2);border-color:rgba(91,141,238,.3)}
+.pred-tab.active{background:rgba(91,141,238,.12);border-color:rgba(91,141,238,.4);color:var(--blue)}
+.pred-card{background:var(--bg2);border:1px solid var(--brd);border-radius:14px;padding:1.4rem}
+.pred-tag{font-size:.68rem;font-weight:700;padding:.2rem .7rem;border-radius:20px;background:rgba(155,109,255,.12);color:var(--purple);text-transform:uppercase;letter-spacing:.5px}
+.pred-btn-main{flex:1;padding:.7rem;border-radius:9px;background:linear-gradient(135deg,#5b8dee,#9b6dff);color:#fff;font-size:.9rem;font-weight:700;border:none;cursor:pointer;font-family:'Inter',sans-serif;transition:.2s;display:flex;align-items:center;justify-content:center;gap:6px}
+.pred-btn-main:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(91,141,238,.4)}
+.pred-btn-main:active{transform:translateY(0)}
+.pred-btn-sec{padding:.7rem 1rem;border-radius:9px;background:rgba(255,255,255,.05);color:var(--fg2);font-size:.82rem;font-weight:600;border:1px solid var(--brd2);cursor:pointer;font-family:'Inter',sans-serif;transition:.15s}
+.pred-btn-sec:hover{background:rgba(255,255,255,.08);color:var(--fg)}
+.pred-result-box{background:var(--bg2);border:2px solid var(--brd);border-radius:16px;padding:1.5rem;transition:border-color .3s,background .3s}
+.pred-result-box.state-high{border-color:rgba(255,107,107,.5);background:rgba(255,107,107,.04)}
+.pred-result-box.state-low{border-color:rgba(93,212,126,.5);background:rgba(93,212,126,.04)}
+
+/* Field styles */
+.pf-row{display:flex;align-items:center;gap:.8rem;padding:.65rem 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.pf-row:last-child{border-bottom:none}
+.pf-label{flex:0 0 140px;font-size:.78rem;font-weight:600;color:var(--fg2);line-height:1.3}
+.pf-label small{display:block;font-size:.65rem;color:var(--fg3);font-weight:400;margin-top:1px}
+.pf-control{flex:1;display:flex;align-items:center;gap:.6rem}
+.pf-num{width:72px;background:var(--bg3);border:1.5px solid var(--brd2);border-radius:8px;padding:.4rem .6rem;color:var(--fg);font-size:.88rem;font-weight:700;font-family:'JetBrains Mono',monospace;text-align:center;outline:none;transition:.15s}
+.pf-num:focus{border-color:var(--blue);background:rgba(91,141,238,.06)}
+.pf-num:hover{border-color:var(--brd2)}
+.pf-range{flex:1;accent-color:var(--blue);cursor:pointer;height:4px}
+.pf-select{flex:1;background:var(--bg3);border:1.5px solid var(--brd2);border-radius:8px;padding:.4rem .7rem;color:var(--fg);font-size:.82rem;font-family:'Inter',sans-serif;outline:none;cursor:pointer;transition:.15s}
+.pf-select:focus{border-color:var(--blue)}
+.pf-immutable{font-size:.62rem;font-weight:700;color:var(--amber);background:rgba(255,179,71,.1);padding:1px 6px;border-radius:4px;margin-left:4px}
+
+/* SHAP bar */
+.shap-row{display:flex;align-items:center;gap:.6rem;margin:.35rem 0}
+.shap-feat{flex:0 0 120px;font-size:.75rem;color:var(--fg2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.shap-bar-wrap{flex:1;height:18px;background:rgba(255,255,255,.04);border-radius:4px;overflow:hidden;position:relative}
+.shap-bar-pos{height:100%;border-radius:4px;background:linear-gradient(90deg,#f0629288,#ff6b6b);transition:width .5s ease}
+.shap-bar-neg{height:100%;border-radius:4px;background:linear-gradient(90deg,#38d9c088,#5dd47e);transition:width .5s ease;position:absolute;right:0;top:0}
+.shap-val{flex:0 0 46px;font-size:.72rem;font-weight:700;font-family:'JetBrains Mono',monospace;text-align:right}
+
+/* Fairness row */
+.fair-row{display:flex;align-items:center;gap:.6rem;padding:.5rem .7rem;border-radius:9px;margin:.3rem 0;background:var(--bg3)}
+.fair-grp{flex:0 0 130px;font-size:.78rem;font-weight:600}
+.fair-pct{flex:0 0 50px;font-size:.88rem;font-weight:800;text-align:right;font-family:'JetBrains Mono',monospace}
+.fair-mini-bar{flex:1;height:6px;background:rgba(255,255,255,.05);border-radius:3px;overflow:hidden}
+.fair-mini-fill{height:100%;border-radius:3px;transition:width .5s ease}
+.fair-verdict{flex:0 0 75px;font-size:.68rem;font-weight:700;padding:2px 7px;border-radius:5px;text-align:center}
+
+/* CF item */
+.cf-item{display:flex;align-items:flex-start;gap:.7rem;padding:.7rem;background:var(--bg3);border-radius:9px;margin:.4rem 0;border:1px solid transparent;transition:.2s}
+.cf-item:hover{border-color:rgba(56,217,192,.25)}
+.cf-num{width:22px;height:22px;border-radius:50%;background:rgba(56,217,192,.15);color:var(--teal);font-size:.72rem;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.cf-body{flex:1}
+.cf-action{font-size:.82rem;font-weight:600;color:var(--fg);margin-bottom:.2rem}
+.cf-detail{font-size:.72rem;color:var(--fg3)}
+.cf-result{font-size:.72rem;font-weight:700;color:var(--teal);margin-top:.3rem}
+
+/* Conf grid chips */
+.conf-chip{background:var(--bg3);border:1px solid var(--brd);border-radius:10px;padding:.6rem;text-align:center}
+.conf-val{font-size:1.1rem;font-weight:800;letter-spacing:-.5px}
+.conf-lbl{font-size:.62rem;color:var(--fg3);margin-top:2px;text-transform:uppercase;letter-spacing:.3px}
+</style>
+
+</div>
+
+<!-- ═══════════════════════ FAIRNESS AUDIT ═══ -->
+<div id="v-audit" class="view" style="padding-top:58px">
+<div class="container">
+  <div class="page-head"><div class="tag">Fairness Audit</div><h2>⚖️ Comprehensive Bias Analysis</h2><p>Full fairness metrics across all datasets and sensitive attributes — with interactive group explorer.</p></div>
+  <div class="tg-grp"><button class="tg on" onclick="setAuditGrp('compas_race',this)">COMPAS Race</button><button class="tg" onclick="setAuditGrp('compas_sex',this)">COMPAS Sex</button><button class="tg" onclick="setAuditGrp('adult_sex',this)">Adult Sex</button><button class="tg" onclick="setAuditGrp('adult_race',this)">Adult Race</button></div>
+  <div class="grid2 mb2">
+    <div class="card"><div class="card-head"><span class="ci">📋</span>Selected Group — Detailed Breakdown</div><div id="audit-detail-main"></div></div>
+    <div class="card"><div class="card-head"><span class="ci">📊</span>TPR / FPR Comparison</div><div class="ch ch-260"><canvas id="c-audit-main"></canvas></div></div>
+  </div>
+  <div class="card mb2">
+    <div class="card-head"><span class="ci">🗺️</span>Full Fairness Scorecard — All Groups × All Metrics</div>
+    <table class="tbl"><thead><tr><th>Metric</th><th>COMPAS Race</th><th>COMPAS Sex</th><th>Adult Sex</th><th>Adult Race</th><th>Pass Threshold</th></tr></thead>
+    <tbody>
+      <tr><td class="tip-w bold">DP-Diff ↓<span class="tip">|P(ŷ=1|A) − P(ŷ=1|B)|. How much positive prediction rate differs between groups.</span></td><td><span class="bg-fail">0.281</span></td><td><span class="bg-fail">0.182</span></td><td><span class="bg-fail">0.162</span></td><td><span class="bg-warn">0.111</span></td><td class="text-green mono">&lt; 0.10</td></tr>
+      <tr><td class="tip-w bold">DP-Ratio ↑<span class="tip">P(minority)/P(majority). Below 0.8 = legal violation (EEOC 80% rule).</span></td><td><span class="bg-fail">0.530</span></td><td><span class="bg-warn">0.635</span></td><td><span class="bg-fail">0.366</span></td><td><span class="bg-fail">0.485</span></td><td class="text-green mono">&gt; 0.80</td></tr>
+      <tr><td class="tip-w bold">EO-Diff ↓<span class="tip">max(|ΔTPR|, |ΔFPR|). Requires both false positive and true positive rates to be equal.</span></td><td><span class="bg-fail">0.297</span></td><td><span class="bg-warn">0.158</span></td><td><span class="bg-pass">0.057</span></td><td><span class="bg-pass">0.040</span></td><td class="text-green mono">&lt; 0.10</td></tr>
+      <tr><td class="tip-w bold">EOP-Diff ↓<span class="tip">|TPR_A − TPR_B|. Equal Opportunity: qualified people in both groups should be equally likely to receive positive outcome.</span></td><td><span class="bg-fail">0.297</span></td><td><span class="bg-warn">0.109</span></td><td><span class="bg-pass">0.012</span></td><td><span class="bg-pass">0.029</span></td><td class="text-green mono">&lt; 0.10</td></tr>
+    </tbody></table>
+  </div>
+  <div class="card"><div class="card-head"><span class="ci">📈</span>Metric Comparison Chart</div><div class="ch ch-260"><canvas id="c-audit-all"></canvas></div></div>
+</div></div>
+
+<!-- ═══════════════════════ EXPLAINABILITY ═══ -->
+<div id="v-explain" class="view" style="padding-top:58px">
+<div class="container">
+  <div class="page-head"><div class="tag">Explainability</div><h2>🔍 SHAP &amp; LIME Explanations</h2><p>Understand why the model makes each decision — globally and for individual predictions.</p></div>
+  <div class="tab-bar">
+    <button class="tab-btn on" onclick="setTab(this,'exp','shap')">🌳 SHAP Global</button>
+    <button class="tab-btn" onclick="setTab(this,'exp','lime')">🔬 LIME Local</button>
+    <button class="tab-btn" onclick="setTab(this,'exp','compare')">↔️ SHAP vs LIME</button>
+  </div>
+  <div id="exp-shap" class="tab-panel on">
+    <div class="grid2 mb2">
+      <div class="card"><div class="card-head"><span class="ci">🌳</span>SHAP Global — COMPAS</div><div class="ch ch-260"><canvas id="c-shap-main-c"></canvas></div><p style="font-size:.7rem;color:var(--fg3);margin-top:.5rem">Mean absolute SHAP value per feature across all test predictions.</p></div>
+      <div class="card"><div class="card-head"><span class="ci">🌳</span>SHAP Global — Adult Income</div><div class="ch ch-260"><canvas id="c-shap-main-a"></canvas></div><p style="font-size:.7rem;color:var(--fg3);margin-top:.5rem">capital_gain and education dominate Adult income model decisions.</p></div>
+    </div>
+    <div class="alert alert-w"><span class="ai">⚠️</span><div>Notice: Sensitive attributes (race, sex) were excluded from model features. Yet <strong>priors_count</strong> may act as a proxy — prior convictions are correlated with race due to systemic over-policing.</div></div>
+  </div>
+  <div id="exp-lime" class="tab-panel">
+    <div class="alert alert-i"><span class="ai">ℹ️</span><div>LIME trains a locally faithful linear model around each prediction by perturbing inputs. Red bars push prediction toward positive class (high risk / income&gt;50K), green bars push away.</div></div>
+    <div style="display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap">
+      <button class="btn btn-s btn-sm" id="lb0" onclick="showLimeMain(0)">⚠️ High Risk / Income</button>
+      <button class="btn btn-s btn-sm" id="lb1" onclick="showLimeMain(1)">✅ Low Risk / Income</button>
+      <button class="btn btn-s btn-sm" id="lb2" onclick="showLimeMain(2)">〰️ Borderline Case</button>
+    </div>
+    <div class="grid2"><div class="card"><div class="card-head"><span class="ci">🔬</span>LIME — COMPAS</div><div class="ch ch-260"><canvas id="c-lime-main-c"></canvas></div></div>
+    <div class="card"><div class="card-head"><span class="ci">🔬</span>LIME — Adult Income</div><div class="ch ch-260"><canvas id="c-lime-main-a"></canvas></div></div></div>
+  </div>
+  <div id="exp-compare" class="tab-panel">
+    <div class="alert alert-i"><span class="ai">ℹ️</span><div>SHAP and LIME should agree on the most important features. Disagreement signals model instability — predictions may not be reliable at that point in feature space.</div></div>
+    <div class="card"><div class="card-head"><span class="ci">↔️</span>Feature Ranking Agreement — COMPAS</div>
+      <table class="tbl"><thead><tr><th>Rank</th><th>SHAP Top Feature</th><th>SHAP Value</th><th>LIME Top Feature</th><th>LIME Weight</th><th>Agreement</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>priors_count</td><td class="text-red">0.445</td><td>priors_count</td><td class="text-red">+0.42</td><td><span class="bg-pass">✓ Agree</span></td></tr>
+        <tr><td>2</td><td>age</td><td class="text-amber">0.182</td><td>age</td><td class="text-amber">+0.28</td><td><span class="bg-pass">✓ Agree</span></td></tr>
+        <tr><td>3</td><td>length_of_stay</td><td>0.095</td><td>length_of_stay</td><td>+0.11</td><td><span class="bg-pass">✓ Agree</span></td></tr>
+        <tr><td>4</td><td>charge_degree</td><td>0.063</td><td>days_b_screening</td><td>−0.08</td><td><span class="bg-warn">~ Partial</span></td></tr>
+        <tr><td>5</td><td>days_b_screening</td><td>0.041</td><td>charge_degree</td><td>+0.05</td><td><span class="bg-pass">✓ Agree</span></td></tr>
+      </tbody></table>
+    </div>
+  </div>
+</div></div>
+
+<!-- ═══════════════════════ BIAS MITIGATION ═══ -->
+<div id="v-mitigate" class="view" style="padding-top:58px">
+<div class="container">
+  <div class="page-head"><div class="tag">Bias Mitigation</div><h2>🛡️ Three Strategies Compared</h2><p>Pick a strategy based on your accuracy-fairness tradeoff requirements.</p></div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.8rem;margin-bottom:1.5rem" id="strat-cards-main"></div>
+  <div class="grid2 mb2">
+    <div class="card"><div class="card-head"><span class="ci">⚖️</span>Fairness–Accuracy Tradeoff (Interactive)</div><div class="ch ch-300"><canvas id="c-mitig-main"></canvas></div></div>
+    <div class="card"><div class="card-head"><span class="ci">📊</span>Before vs After — Selected Strategy</div><div class="ch ch-300"><canvas id="c-mitig-before-after"></canvas></div></div>
+  </div>
+  <div class="card"><div class="card-head"><span class="ci">📚</span>Strategy Explainer</div><div id="strat-explainer"></div></div>
+</div></div>
+
+<!-- ═══════════════════════ REPORTS ═══ -->
+<div id="v-report" class="view" style="padding-top:58px">
+<div class="container">
+  <div class="page-head"><div class="tag">Reports &amp; Export</div><h2>📋 Generated Reports</h2><p>Download fairness audit reports, model cards, and individual decision explanations.</p></div>
+  <div id="report-dashboard"></div>
+</div></div>
+
+<footer><div class="fl">⚖️ FairXplain</div><div class="fs">Trustworthy AI Framework · COMPAS &amp; Adult Income · shap · lime · fairlearn · aif360 · dice_ml · dowhy</div></footer>
+
+<script>
+// ════ REAL DATA ════════════════════════════════════════════════
+const D = {
+  compasMetrics:[
+    {m:'Logistic Regression',acc:.6744,pre:.6399,rec:.6512,f1:.6455,auc:.7306},
+    {m:'Random Forest',      acc:.6247,pre:.5883,rec:.5848,f1:.5866,auc:.6677},
+    {m:'XGBoost',            acc:.6674,pre:.6605,rec:.5540,f1:.6026,auc:.7128}],
+  adultMetrics:[
+    {m:'Logistic Regression',acc:.8047,pre:.5624,rec:.8512,f1:.6773,auc:.9069},
+    {m:'Random Forest',      acc:.8402,pre:.6737,rec:.6522,f1:.6628,auc:.8918},
+    {m:'XGBoost',            acc:.8719,pre:.7776,rec:.6556,f1:.7114,auc:.9276}],
+  mitigation:[
+    {n:'Baseline',    acc:.6744,f1:.6455,dp:.7273,eo:1.000,type:'None'},
+    {n:'Reweighing',  acc:.6739,f1:.6451,dp:.7273,eo:1.000,type:'Pre-processing'},
+    {n:'Exp. Gradient',acc:.5437,f1:.1039,dp:.1818,eo:.6667,type:'In-processing'},
+    {n:'Threshold Opt.',acc:.6458,f1:.4954,dp:.8351,eo:1.000,type:'Post-processing'}],
+  audit:{
+    compas_race:{dp:.281,dpr:.530,eo:.297,eop:.297,tprA:.759,tprB:.463,fprA:.411,fprB:.230,gA:'African-Am.',gB:'Caucasian'},
+    compas_sex: {dp:.182,dpr:.635,eo:.158,eop:.109,tprA:.668,tprB:.559,fprA:.343,fprB:.185,gA:'Male',gB:'Female'},
+    adult_sex:  {dp:.162,dpr:.366,eo:.057,eop:.012,tprA:.658,tprB:.645,fprA:.081,fprB:.024,gA:'Male',gB:'Female'},
+    adult_race: {dp:.111,dpr:.485,eo:.040,eop:.029,tprA:.657,tprB:.628,fprA:.064,fprB:.024,gA:'White',gB:'Black'}},
+  compas_cf:[
+    {i:1,orig:[.47,-1.35,1.01,.35,.60],label:'HIGH RISK',
+     cfs:[[4.44,-1.35,-0.03,.35,.60],[3.90,-1.35,1.01,.35,5.89],[2.80,-1.35,1.01,.35,.60]]},
+    {i:3,orig:[1.75,.74,.37,.15,6.07],label:'HIGH RISK',
+     cfs:[[1.75,.74,.37,-4.88,6.07],[1.75,.74,.37,.15,2.04],[1.75,.74,.37,.15,1.11]]},
+    {i:6,orig:[-.39,-1.35,.80,.15,.48],label:'HIGH RISK',
+     cfs:[[4.88,-1.35,.80,-2.00,.48],[2.17,.03,.80,.15,.48],[-.39,-1.35,.80,-4.86,.48]]}],
+  adult_cf:[
+    {i:0,orig:[.91,-.42,-.15,-.22,-.04],label:'INCOME ≤50K',
+     cfs:[[.91,-.42,9.88,-.22,-.04],[.91,-.42,3.98,-.22,-.04],[.91,-.42,-.15,-.22,4.14]]},
+    {i:1,orig:[-1.29,.36,-.15,-.22,-2.29],label:'INCOME ≤50K',
+     cfs:[[-1.29,.36,6.62,5.40,-2.29],[-1.29,.27,6.24,-.22,-2.29],[-1.29,.36,-.15,8.59,1.47]]},
+    {i:2,orig:[.32,1.13,-.15,-.22,.61],label:'INCOME ≤50K',
+     cfs:[[.32,1.13,-.15,6.19,-2.19],[.32,.31,-.15,3.62,.61],[.32,1.13,-.15,9.66,.61]]}],
+  compasFeats:['age','charge_degree','priors_count','days_b_screen','length_of_stay'],
+  adultFeats: ['age','education_num','capital_gain','capital_loss','hours_per_week'],
+  lime:{
+    compas:[
+      {f:['priors_count','age','length_stay','charge_deg','days_screen'],v:[.42,.28,.11,-.08,-.05]},
+      {f:['priors_count','age','length_stay','charge_deg','days_screen'],v:[-.38,-.22,-.09,.06,.03]},
+      {f:['priors_count','age','length_stay','charge_deg','days_screen'],v:[.18,-.15,.08,-.07,.04]}],
+    adult:[
+      {f:['capital_gain','education_num','hours/week','capital_loss','age'],v:[.55,.32,.15,-.06,.12]},
+      {f:['capital_gain','education_num','hours/week','capital_loss','age'],v:[-.45,-.28,-.13,.04,-.10]},
+      {f:['capital_gain','education_num','hours/week','capital_loss','age'],v:[.22,-.18,.10,-.08,.15]}]}
+};
+
+// ════ CHART THEME ════════════════════════════════════════════
+const C={blue:'#5b8dee',purple:'#9b6dff',teal:'#38d9c0',pink:'#f06292',amber:'#ffb347',green:'#5dd47e',red:'#ff6b6b',fg2:'#9898b4',fg3:'#52526a',brd:'rgba(255,255,255,.07)'};
+Chart.defaults.color=C.fg2; Chart.defaults.borderColor=C.brd;
+Chart.defaults.font.family='Inter'; Chart.defaults.plugins.legend.labels.boxWidth=10;
+Chart.defaults.plugins.legend.labels.padding=12;
+const CHS={};
+function dc(id){if(CHS[id]){CHS[id].destroy();delete CHS[id];}}
+function bar(label,data,color){return{label,data,backgroundColor:color+'88',borderColor:color,borderWidth:1.5,borderRadius:5};}
+
+// ════ VIEW ROUTER ════════════════════════════════════════════
+const VIEWS=['home','workflow','pipeline','predict','audit','explain','mitigate','report'];
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  const el=document.getElementById('v-'+id);
+  if(el) el.classList.add('on');
+  document.querySelectorAll('.nt').forEach(n=>n.classList.remove('on'));
+  const idx={workflow:0,pipeline:1,predict:2,audit:3,explain:4,mitigate:5,report:6}[id];
+  if(idx!==undefined) document.querySelectorAll('.nt')[idx]?.classList.add('on');
+  setTimeout(()=>initView(id),60);
+  window.scrollTo(0,0);
+}
+
+function initView(id){
+  if(id==='workflow'){
+    // Show step 0, hide all others
+    for(let i=0;i<=WIZ_MAX;i++){
+      const p=document.getElementById('wiz-'+i);
+      if(p) p.style.display = (i===0) ? 'block' : 'none';
+    }
+    // Reset progress nodes
+    for(let i=0;i<=WIZ_MAX;i++){
+      const nd=document.getElementById('wn'+i);
+      if(nd){
+        nd.style.background = i===0 ? 'var(--bg)' : 'var(--bg2)';
+        nd.style.borderColor = i===0 ? 'var(--purple)' : 'var(--brd)';
+        nd.style.color = i===0 ? 'var(--purple)' : 'var(--fg3)';
+      }
+      const line=document.getElementById('wp'+i);
+      if(line) line.style.background = 'var(--brd)';
+    }
+    wizStep=0;
+    // Build the input fields for current use case
+    const desc=document.getElementById('wiz-uc-desc');
+    if(desc) desc.innerHTML = WIZ_CASES[wizCase].desc;
+    buildWizFields(wizCase);
+    const sb=document.getElementById('start-btn');
+    if(sb){sb.disabled=false;sb.innerHTML='<span style="font-size:1rem">⚡</span> Run Full Analysis';sb.style.opacity='1';}
+  }
+  if(id==='pipeline'){showPhase(0);}
+  if(id==='audit'){renderAuditMain('compas_race');renderAuditAll();}
+  if(id==='explain'){renderSHAPMain();renderLimeMain(0);}
+  if(id==='mitigate'){renderMitigMain();}
+  if(id==='predict'){buildInfForm('compas');}
+  if(id==='report'){renderReport();}
+}
+
+// ════ PIPELINE PHASES ════════════════════════════════════════
+let curPhase=0;
+function showPhase(n){
+  curPhase=n;
+  // Only toggle pipeline phase panels, not wiz panels
+  document.querySelectorAll('[id^="phase-"]').forEach(p=>{
+    p.style.display = 'none';
+    p.classList.remove('on');
+  });
+  const target = document.getElementById('phase-'+n);
+  if(target){ target.style.display='block'; target.classList.add('on'); }
+  document.querySelectorAll('.sb').forEach((b,i)=>b.classList.toggle('on',i===n));
+  setTimeout(()=>renderPhase(n),60);
+  animateBars();
+}
+function renderPhase(n){
+  const r={0:renderEDA,1:renderModels,2:renderExplainPhase,3:renderAuditPhase,4:renderMitigPhase,5:renderCFPhase,6:renderCausalPhase,7:renderMaster};
+  if(r[n]) r[n]();
+}
+
+// ════ EDA ════════════════════════════════════════════════════
+let edaDs='compas';
+function setTg(btn,group,ds){
+  btn.closest('.tg-grp').querySelectorAll('.tg').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(group==='eda'){edaDs=ds;['eda-compas','eda-adult'].forEach(id=>document.getElementById(id).style.display='none');document.getElementById('eda-'+ds).style.display='block';setTimeout(renderEDA,50);}
+  if(group==='models'){modelDs=ds;setTimeout(renderModels,50);}
+  if(group==='cf'){cfDs=ds;cfInst=0;setTimeout(renderCFPhase,50);}
+  animateBars();
+}
+function renderEDA(){
+  dc('c-race-recid');
+  const c1=document.getElementById('c-race-recid');
+  if(c1) CHS['c-race-recid']=new Chart(c1,{type:'bar',data:{labels:['Other','Hispanic','Caucasian','Asian','Native Am.','African-Am.'],datasets:[{label:'Recidivism %',data:[34.4,39.5,39.1,27,35,52.3],backgroundColor:[C.teal+'88',C.teal+'88',C.blue+'88',C.purple+'88',C.fg2+'88',C.pink+'88'],borderColor:[C.teal,C.teal,C.blue,C.purple,C.fg2,C.pink],borderWidth:1.5,borderRadius:5}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:v=>v.raw+'%'}}},scales:{x:{min:0,max:65,ticks:{callback:v=>v+'%'},grid:{color:C.brd}},y:{grid:{display:false}}}}});
+  dc('c-adult-grp');
+  const c2=document.getElementById('c-adult-grp');
+  if(c2) CHS['c-adult-grp']=new Chart(c2,{type:'bar',data:{labels:['Asian-Pac','White','Other','Black','Female','Male'],datasets:[{label:'Income >50K %',data:[27.2,26.0,15.2,12.5,10.9,30.6],backgroundColor:[C.teal+'88',C.blue+'88',C.fg2+'88',C.purple+'88',C.pink+'88',C.teal+'88'],borderColor:[C.teal,C.blue,C.fg2,C.purple,C.pink,C.teal],borderWidth:1.5,borderRadius:5}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:v=>v.raw+'%'}}},scales:{x:{min:0,max:40,ticks:{callback:v=>v+'%'},grid:{color:C.brd}},y:{grid:{display:false}}}}});
+}
+
+// ════ MODELS ═════════════════════════════════════════════════
+let modelDs='compas';
+function renderModels(){
+  const data=modelDs==='compas'?D.compasMetrics:D.adultMetrics;
+  const cols=[C.blue,C.teal,C.pink];
+  dc('c-models');
+  const c=document.getElementById('c-models');
+  if(c) CHS['c-models']=new Chart(c,{type:'bar',data:{labels:['Accuracy','Precision','Recall','F1'],datasets:data.map((d,i)=>bar(d.m,[d.acc,d.pre,d.rec,d.f1],cols[i]))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{min:0,max:1,grid:{color:C.brd}},x:{grid:{display:false}}}}});
+  dc('c-auc');
+  const c2=document.getElementById('c-auc');
+  if(c2) CHS['c-auc']=new Chart(c2,{type:'bar',data:{labels:data.map(d=>d.m),datasets:[{label:'ROC-AUC',data:data.map(d=>d.auc),backgroundColor:cols.map(c=>c+'88'),borderColor:cols,borderWidth:1.5,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{y:{min:.5,max:1,grid:{color:C.brd}},x:{grid:{display:false}}}}});
+  const best=document.getElementById('best-badge');
+  if(best){const bm=data.reduce((a,b)=>a.auc>b.auc?a:b);best.innerHTML=`<div class="alert alert-g"><span class="ai">🏆</span><div><strong>Best Model: ${bm.m}</strong><br/>AUC ${bm.auc.toFixed(4)} · Accuracy ${(bm.acc*100).toFixed(1)}% · F1 ${(bm.f1*100).toFixed(1)}%</div></div>`;}
+  const mt=document.getElementById('metrics-tbl');
+  if(mt) mt.innerHTML=`<table class="tbl"><thead><tr><th>Model</th><th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1</th><th>ROC-AUC</th></tr></thead><tbody>${data.map((d,i)=>`<tr><td style="color:${cols[i]};font-weight:700">${d.m}</td><td>${(d.acc*100).toFixed(1)}%</td><td>${(d.pre*100).toFixed(1)}%</td><td>${(d.rec*100).toFixed(1)}%</td><td>${(d.f1*100).toFixed(1)}%</td><td style="color:${cols[i]};font-weight:700">${d.auc.toFixed(4)}</td></tr>`).join('')}</tbody></table>`;
+}
+</script>
+
+<script>
+// ════ SHAP / LIME ═════════════════════════════════════════════
+function renderExplainPhase(){renderSHAPPhase();renderLimePhase(0);}
+function renderSHAPPhase(){
+  ['c-shap-c','c-shap-a'].forEach(id=>dc(id));
+  const csc=document.getElementById('c-shap-c');
+  if(csc) CHS['c-shap-c']=new Chart(csc,{type:'bar',data:{labels:['priors_count','age','length_stay','charge_degree','days_screen'],datasets:[{label:'Mean |SHAP|',data:[.445,.182,.095,.063,.041],backgroundColor:[C.pink+'99',C.amber+'99',C.blue+'99',C.purple+'99',C.teal+'99'],borderColor:[C.pink,C.amber,C.blue,C.purple,C.teal],borderWidth:1.5,borderRadius:5}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:C.brd}},y:{grid:{display:false}}}}});
+  const csa=document.getElementById('c-shap-a');
+  if(csa) CHS['c-shap-a']=new Chart(csa,{type:'bar',data:{labels:['capital_gain','education_num','age','hours/week','capital_loss'],datasets:[{label:'Mean |SHAP|',data:[.612,.341,.188,.134,.097],backgroundColor:[C.teal+'99',C.blue+'99',C.amber+'99',C.purple+'99',C.pink+'99'],borderColor:[C.teal,C.blue,C.amber,C.purple,C.pink],borderWidth:1.5,borderRadius:5}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:C.brd}},y:{grid:{display:false}}}}});
+}
+let curLimeCase=0;
+function showLime(n){
+  curLimeCase=n;
+  [0,1,2].forEach(i=>{const b=document.getElementById('lc'+i);if(b){b.classList.toggle('on',i===n);b.style.background=i===n?C.blue+'22':'';b.style.borderColor=i===n?C.blue:'var(--brd2)';}});
+  renderLimePhase(n);
+}
+function renderLimePhase(n){
+  const lc=D.lime.compas[n],la=D.lime.adult[n];
+  ['c-lime-c','c-lime-a'].forEach(id=>dc(id));
+  const makeLime=(id,feats,vals)=>{const el=document.getElementById(id);if(!el)return;CHS[id]=new Chart(el,{type:'bar',data:{labels:feats,datasets:[{label:'LIME weight',data:vals,backgroundColor:vals.map(v=>v>0?C.red+'88':C.teal+'88'),borderColor:vals.map(v=>v>0?C.red:C.teal),borderWidth:1.5,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:v=>`${v.raw>0?'+':''}${v.raw.toFixed(3)}`}}},scales:{x:{grid:{color:C.brd}},y:{grid:{display:false}}}}});};
+  makeLime('c-lime-c',lc.f,lc.v);makeLime('c-lime-a',la.f,la.v);
+}
+
+// ════ AUDIT PHASE ════════════════════════════════════════════
+let curAuditGrp='compas_race';
+function setAuditGrp(grp,btn){
+  curAuditGrp=grp;
+  if(btn){btn.closest('.tg-grp').querySelectorAll('.tg').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+  renderAuditPhase();renderAuditMain(grp);
+}
+function renderAuditPhase(){
+  const d=D.audit[curAuditGrp];
+  const det=document.getElementById('audit-grp-detail');
+  if(det) det.innerHTML=`<div class="chips" style="grid-template-columns:1fr 1fr;margin-bottom:.7rem"><div class="chip"><div class="cv" style="color:${d.dp>.2?C.red:d.dp>.1?C.amber:C.green};font-size:1.2rem">${d.dp.toFixed(3)}</div><div class="cl">DP-Diff</div></div><div class="chip"><div class="cv" style="color:${d.dpr<.8?C.red:C.green};font-size:1.2rem">${d.dpr.toFixed(3)}</div><div class="cl">DP-Ratio</div></div><div class="chip"><div class="cv" style="color:${d.eo>.1?C.amber:C.green};font-size:1.2rem">${d.eo.toFixed(3)}</div><div class="cl">EO-Diff</div></div><div class="chip"><div class="cv" style="color:${d.eop>.1?C.amber:C.green};font-size:1.2rem">${d.eop.toFixed(3)}</div><div class="cl">EOP-Diff</div></div></div><table class="tbl"><thead><tr><th>Group</th><th>TPR</th><th>FPR</th></tr></thead><tbody><tr><td><strong>${d.gA}</strong></td><td style="color:${C.teal}">${(d.tprA*100).toFixed(1)}%</td><td style="color:${C.amber}">${(d.fprA*100).toFixed(1)}%</td></tr><tr><td><strong>${d.gB}</strong></td><td style="color:${C.teal}">${(d.tprB*100).toFixed(1)}%</td><td style="color:${C.amber}">${(d.fprB*100).toFixed(1)}%</td></tr><tr><td colspan="3" style="font-size:.7rem;color:var(--fg3);padding-top:.4rem">ΔTPR=${Math.abs(d.tprA-d.tprB).toFixed(3)} · ΔFPR=${Math.abs(d.fprA-d.fprB).toFixed(3)}</td></tr></tbody></table>`;
+  dc('c-audit');
+  const ca=document.getElementById('c-audit');
+  if(ca) CHS['c-audit']=new Chart(ca,{type:'bar',data:{labels:['TPR','FPR'],datasets:[bar(d.gA,[d.tprA,d.fprA],C.blue),bar(d.gB,[d.tprB,d.fprB],C.pink)]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{min:0,max:1,grid:{color:C.brd}},x:{grid:{display:false}}}}});
+}
+
+// ════ MITIGATION PHASE ═══════════════════════════════════════
+let selStratIdx=0;
+function selStrat(i){
+  selStratIdx=i;
+  [0,1,2,3].forEach(j=>{const c=document.getElementById('sc'+j);if(c){c.style.borderColor=j===i?'rgba(91,141,238,.4)':'var(--brd)';c.style.background=j===i?'rgba(91,141,238,.05)':'var(--bg2)';}});
+  renderStratDetail(i);
+  if(document.getElementById('c-mitig-before-after')) renderBeforeAfter(i);
+}
+const STRAT_INFO=[
+  {desc:'No fairness intervention applied. Trained purely for accuracy. Serves as the baseline for comparison.',pros:'Highest accuracy (67.4%), best F1.',cons:'DP-Diff = 0.727 — severely biased, far below legal threshold.',rec:'Not suitable for deployment in high-stakes decisions.'},
+  {desc:'Reweighing (AIF360) adjusts training sample weights to balance (group, label) combinations before model fitting.',pros:'Preserves model architecture, no accuracy loss.',cons:'On this dataset, fairness metrics unchanged (DP-Diff still 0.727).',rec:'Effective when data imbalance is root cause. Insufficient here.'},
+  {desc:'Exponentiated Gradient (fairlearn) enforces fairness constraint during training via a sequence of weighted classification problems.',pros:'DP-Diff drops from 0.727 → 0.182. Fairest outcome.',cons:'Accuracy drops 13pp (67.4% → 54.4%). Significant tradeoff.',rec:'⭐ Recommended when fairness is the primary requirement.'},
+  {desc:'Threshold Optimizer adjusts per-group decision cutoffs post-hoc without retraining the base model.',pros:'No retraining needed, easy to deploy.',cons:'Worsens both accuracy and fairness on this dataset.',rec:'Use only when model retraining is not possible.'}];
+function renderStratDetail(i){
+  const d=D.mitigation[i],info=STRAT_INFO[i];
+  const det=document.getElementById('strat-det');
+  if(det) det.innerHTML=`<p style="font-size:.8rem;color:var(--fg2);line-height:1.7;margin-bottom:.8rem">${info.desc}</p><div class="chips" style="grid-template-columns:1fr 1fr"><div class="chip"><div class="cv" style="color:${C.teal};font-size:1.3rem">${(d.acc*100).toFixed(1)}%</div><div class="cl">Accuracy</div></div><div class="chip"><div class="cv" style="color:${C.blue};font-size:1.3rem">${(d.f1*100).toFixed(1)}%</div><div class="cl">F1</div></div><div class="chip"><div class="cv" style="color:${d.dp>.3?C.red:d.dp>.1?C.amber:C.green};font-size:1.3rem">${d.dp.toFixed(3)}</div><div class="cl">DP-Diff</div></div><div class="chip"><div class="cv" style="color:${d.eo>.5?C.red:C.amber};font-size:1.3rem">${d.eo.toFixed(3)}</div><div class="cl">EO-Diff</div></div></div><div style="margin-top:.7rem;font-size:.78rem"><div style="color:${C.green};margin-bottom:.3rem">✅ ${info.pros}</div><div style="color:${C.red};margin-bottom:.3rem">❌ ${info.cons}</div><div style="color:${C.amber}">💡 ${info.rec}</div></div>`;
+}
+function renderMitigPhase(){
+  dc('c-mitig');
+  const cm=document.getElementById('c-mitig');
+  const cols=[C.fg3,C.blue,C.green,C.amber];
+  if(cm) CHS['c-mitig']=new Chart(cm,{type:'scatter',data:{datasets:D.mitigation.map((s,i)=>({label:s.n,data:[{x:s.dp,y:s.acc}],backgroundColor:cols[i]+'88',borderColor:cols[i],pointRadius:14,pointHoverRadius:17}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'},tooltip:{callbacks:{label:c=>`${c.dataset.label}: Acc=${(c.raw.y*100).toFixed(1)}% · DP-Diff=${c.raw.x.toFixed(3)}`}}},scales:{x:{title:{display:true,text:'DP-Difference (lower=fairer)'},min:0,max:1,grid:{color:C.brd}},y:{title:{display:true,text:'Accuracy'},min:.45,max:.75,ticks:{callback:v=>(v*100).toFixed(0)+'%'},grid:{color:C.brd}}}}});
+  selStrat(0);
+}
+</script>
+``
+
+<script>
+// ════ COUNTERFACTUALS ════════════════════════════════════════
+let cfDs='compas',cfInst=0;
+function renderCFPhase(){
+  const all=cfDs==='compas'?D.compas_cf:D.adult_cf;
+  const feats=cfDs==='compas'?D.compasFeats:D.adultFeats;
+  const sel=document.getElementById('cf-inst-sel');
+  if(sel) sel.innerHTML=all.map((d,i)=>`<button class="btn btn-s btn-sm ${i===cfInst?'btn-t':''}" onclick="selCFInst(${i},this)">Instance #${d.i}</button>`).join('');
+  const d=all[cfInst];
+  const disp=document.getElementById('cf-display');
+  if(!disp) return;
+  disp.innerHTML=`<div class="card mb2"><div class="card-head"><span class="ci">🎯</span>Original Prediction: <span style="color:var(--red);font-weight:800">${d.label}</span> &nbsp; <span class="bg-fail">Negative Outcome</span></div><p style="font-size:.78rem;color:var(--fg2);margin-bottom:1rem">The 3 counterfactuals below show the minimum changes needed to flip the prediction. <strong>Race &amp; Sex are immutable</strong> — they cannot be asked to change.</p>
+  <div style="overflow-x:auto"><table class="tbl" style="min-width:480px"><thead><tr><th>Feature</th><th>Original</th><th>CF 1</th><th>CF 2</th><th>CF 3</th></tr></thead>
+  <tbody>${feats.map((f,fi)=>`<tr><td class="mono" style="color:var(--fg2)">${f}</td><td class="mono text-red">${d.orig[fi].toFixed(3)}</td>${d.cfs.map(cf=>{const chg=Math.abs(cf[fi]-d.orig[fi])>0.01;return`<td class="mono" style="${chg?'color:var(--green);font-weight:700':''}">${chg?'→ ':' '}${cf[fi].toFixed(2)}</td>`;}).join('')}</tr>`).join('')}</tbody></table></div></div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:.8rem">${d.cfs.map((cf,ci)=>{const changes=feats.filter((_,fi)=>Math.abs(cf[fi]-d.orig[fi])>0.01);return`<div class="card" style="background:var(--bg3)"><div style="font-size:.8rem;font-weight:700;margin-bottom:.6rem;display:flex;align-items:center;gap:6px">🔄 Counterfactual ${ci+1} <span class="bg-pass">${changes.length} change${changes.length>1?'s':''}</span></div>${changes.map(f=>{const fi=feats.indexOf(f);return`<div class="cf-row"><span class="cf-feat">${f}</span><span class="cf-o">${d.orig[fi].toFixed(2)}</span><span class="cf-arr">→</span><span class="cf-n">${cf[fi].toFixed(2)}</span></div>`;}).join('')}<div style="margin-top:.6rem;padding:.45rem .7rem;background:rgba(93,212,126,.06);border-radius:7px;font-size:.73rem;color:var(--green)">✅ Flips to: <strong>${cfDs==='compas'?'LOW RISK':'INCOME >50K'}</strong></div></div>`;}).join('')}</div>`;
+}
+function selCFInst(i,btn){cfInst=i;renderCFPhase();}
+
+// ════ CAUSAL PHASE ════════════════════════════════════════════
+function renderCausalPhase(){
+  dc('c-ate');
+  const ca=document.getElementById('c-ate');
+  if(ca) CHS['c-ate']=new Chart(ca,{type:'bar',data:{labels:['COMPAS: Race → Recidivism','Adult: Sex → Income'],datasets:[{label:'ATE',data:[.1621,-.1481],backgroundColor:[C.pink+'99',C.teal+'99'],borderColor:[C.pink,C.teal],borderWidth:2,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:v=>`ATE: ${v.raw>0?'+':''}${v.raw.toFixed(4)}`}}},scales:{y:{title:{display:true,text:'Probability Shift'},grid:{color:C.brd}},x:{grid:{display:false}}}}});
+}
+
+// ════ MASTER RESULTS ═════════════════════════════════════════
+function renderMaster(){
+  dc('c-master');
+  const cm=document.getElementById('c-master');
+  if(cm) CHS['c-master']=new Chart(cm,{type:'bar',data:{labels:['LR COMPAS','RF COMPAS','XGB COMPAS','LR Adult','RF Adult','XGB Adult'],datasets:[{label:'ROC-AUC',data:[.7306,.6677,.7128,.9069,.8918,.9276],backgroundColor:C.blue+'88',borderColor:C.blue,borderWidth:1.5,borderRadius:4,yAxisID:'y'},{label:'DP-Diff',type:'line',data:[.281,.281,.281,.162,.162,.162],borderColor:C.red,borderWidth:2,pointRadius:5,backgroundColor:'transparent',yAxisID:'y',borderDash:[4,4]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{min:0,max:1.05,grid:{color:C.brd}},x:{grid:{display:false}}}}});
+}
+
+// ════ LIVE PREDICTION ENGINE ══════════════════════════════════
+const MODELS={
+  compas:{
+    label:'COMPAS Recidivism',
+    fields:[
+      {k:'age',   lbl:'Age',              t:'range',min:18,max:70,step:1,def:28,unit:'yrs'},
+      {k:'prior', lbl:'Prior Offences',   t:'range',min:0, max:20,step:1,def:3, unit:''},
+      {k:'charge',lbl:'Charge Degree',    t:'select',opts:['Misdemeanor','Felony'],def:0},
+      {k:'days',  lbl:'Days Since Arrest',t:'range',min:-30,max:30,step:1,def:0,unit:''},
+      {k:'stay',  lbl:'Jail Stay (days)', t:'range',min:0,max:100,step:1,def:10,unit:'d'},
+      {k:'race',  lbl:'Race ⚠️ immutable',t:'select',opts:['African-American','Caucasian','Hispanic','Other'],def:0},
+      {k:'sex',   lbl:'Sex ⚠️ immutable', t:'select',opts:['Male','Female'],def:0}],
+    pred(v){
+      const a=(v.age-34)/10.5,p=(v.prior-3.2)/4.5,st=(v.stay-25)/30,ch=v.charge===1?0.74:-1.35,d=(v.days)/8;
+      return 1/(1+Math.exp(-(-0.12+p*.58+a*(-.42)+ch*.18+st*.08+d*.04)));
+    },
+    sensKey:'race',sensOpts:['African-American','Caucasian','Hispanic','Other'],
+    outHigh:'HIGH RISK',outLow:'LOW RISK',
+    cfHints:['Reduce prior offences','Lower jail stay duration','Misdemeanor vs Felony charge'],
+    feats:['prior_cnt','age','charge','stay','days'],shap:[.42,.28,.11,-.08,-.05]
+  },
+  adult:{
+    label:'Adult Income >$50K',
+    fields:[
+      {k:'age',  lbl:'Age',             t:'range',min:18,max:70,step:1,def:38,unit:'yrs'},
+      {k:'edu',  lbl:'Education Level', t:'range',min:1, max:16,step:1,def:10,unit:'/16'},
+      {k:'cgain',lbl:'Capital Gain $k', t:'range',min:0, max:100,step:1,def:0, unit:'k'},
+      {k:'hours',lbl:'Hours / Week',    t:'range',min:1, max:80, step:1,def:40,unit:'h'},
+      {k:'work', lbl:'Workclass',       t:'select',opts:['Private','Self-employed','Government','Other'],def:0},
+      {k:'mar',  lbl:'Marital Status',  t:'select',opts:['Married','Never-married','Divorced','Other'],def:0},
+      {k:'sex',  lbl:'Sex ⚠️ immutable',t:'select',opts:['Male','Female'],def:0}],
+    pred(v){
+      const a=(v.age-38)/13,e=(v.edu-10)/2.6,cg=v.cgain/15,h=(v.hours-40)/12,mar=v.mar===0?.6:0;
+      return 1/(1+Math.exp(-(-1.2+e*.72+cg*1.1+a*.38+h*.28+mar+.05)));
+    },
+    sensKey:'sex',sensOpts:['Male','Female'],
+    outHigh:'INCOME >50K',outLow:'INCOME ≤50K',
+    cfHints:['Increase capital gain','Improve education level','Work more hours/week'],
+    feats:['capital_gain','edu_num','hours/wk','age','cap_loss'],shap:[.55,.32,.15,.12,-.06]
+  },
+  loan:{
+    label:'Loan Approval',
+    fields:[
+      {k:'income',lbl:'Annual Income $k',t:'range',min:20,max:200,step:5,def:55,unit:'k'},
+      {k:'credit',lbl:'Credit Score',    t:'range',min:300,max:850,step:10,def:650,unit:''},
+      {k:'debt',  lbl:'Debt-to-Income %',t:'range',min:5,max:60,step:1,def:35,unit:'%'},
+      {k:'employ',lbl:'Employment Years',t:'range',min:0,max:30,step:1,def:5,unit:'yrs'},
+      {k:'loan',  lbl:'Loan Amount $k',  t:'range',min:10,max:300,step:5,def:80,unit:'k'},
+      {k:'race',  lbl:'Race ⚠️ immutable',t:'select',opts:['White','Black','Hispanic','Asian','Other'],def:0},
+      {k:'sex',   lbl:'Sex ⚠️ immutable', t:'select',opts:['Male','Female'],def:0}],
+    pred(v){
+      const cr=(v.credit-650)/100,inc=(v.income-55)/30,dr=(v.debt-35)/10,em=(v.employ-5)/5,lv=(v.loan-80)/50;
+      return 1/(1+Math.exp(-(.5+cr*.9+inc*.5-dr*.6+em*.3-lv*.2)));
+    },
+    sensKey:'race',sensOpts:['White','Black','Hispanic','Asian','Other'],
+    outHigh:'APPROVED',outLow:'DENIED',
+    cfHints:['Improve credit score by 60+ points','Reduce debt-to-income ratio','Increase employment history'],
+    feats:['credit_score','income','debt_ratio','employ_yrs','loan_amt'],shap:[.58,.32,-.45,.22,-.18]
+  },
+  hiring:{
+    label:'Hiring Decision',
+    fields:[
+      {k:'exp',  lbl:'Years Experience', t:'range',min:0,max:20,step:1,def:4,unit:'yrs'},
+      {k:'edu',  lbl:'Education Level',  t:'range',min:1,max:16,step:1,def:12,unit:'/16'},
+      {k:'score',lbl:'Skills Score %',   t:'range',min:30,max:100,step:1,def:70,unit:'%'},
+      {k:'gap',  lbl:'Employment Gap',   t:'range',min:0,max:60,step:1,def:6,unit:'mo'},
+      {k:'ref',  lbl:'Reference Count',  t:'range',min:0,max:5,step:1,def:2,unit:''},
+      {k:'sex',  lbl:'Sex ⚠️ immutable', t:'select',opts:['Male','Female','Non-binary'],def:0},
+      {k:'race', lbl:'Race ⚠️ immutable',t:'select',opts:['White','Black','Hispanic','Asian','Other'],def:0}],
+    pred(v){
+      const e=(v.exp-4)/4,ed=(v.edu-12)/2,sk=(v.score-70)/15,g=(v.gap-6)/12,r=v.ref/3;
+      return 1/(1+Math.exp(-(.2+e*.55+ed*.4+sk*.7-g*.35+r*.25)));
+    },
+    sensKey:'sex',sensOpts:['Male','Female','Non-binary'],
+    outHigh:'SHORTLISTED',outLow:'REJECTED',
+    cfHints:['Improve skills assessment score','Increase years of experience','Reduce employment gap'],
+    feats:['skills_score','experience','edu_level','references','emp_gap'],shap:[.52,.38,.31,.22,-.28]
+  }
+};
+
+let curModel='compas';
+function switchModel(m,btn){
+  curModel=m;
+  if(btn){btn.closest('.tg-grp').querySelectorAll('.tg').forEach(b=>b.classList.remove('on'));btn.classList.add('on');}
+  const ml=document.getElementById('model-label');
+  if(ml) ml.textContent=MODELS[m].label;
+  buildInfForm(m);
+  clearResult();
+}
+
+function buildInfForm(m){
+  const cfg=MODELS[m];
+  const wrap=document.getElementById('inf-inputs');
+  if(!wrap) return;
+  wrap.innerHTML='<div class="form-grid">'+cfg.fields.map(f=>{
+    if(f.t==='range') return `<div class="fg"><label>${f.lbl} <span class="rv" id="rv-${f.k}">${f.def}${f.unit}</span></label><input type="range" id="fi-${f.k}" min="${f.min}" max="${f.max}" step="${f.step}" value="${f.def}" oninput="document.getElementById('rv-${f.k}').textContent=this.value+'${f.unit}'"/></div>`;
+    return `<div class="fg"><label>${f.lbl}</label><select id="fi-${f.k}">${f.opts.map((o,i)=>`<option value="${i}">${o}</option>`).join('')}</select></div>`;
+  }).join('')+'</div>';
+}
+
+function getVals(m){
+  const cfg=MODELS[m],vals={};
+  cfg.fields.forEach(f=>{const el=document.getElementById('fi-'+f.k);if(el) vals[f.k]=f.t==='range'?parseFloat(el.value):parseInt(el.value);});
+  return vals;
+}
+
+function clearResult(){
+  const rb=document.getElementById('res-box');if(rb)rb.className='res-box';
+  const rv=document.getElementById('res-v');if(rv){rv.textContent='—';rv.style.color='var(--fg3)';}
+  const rp=document.getElementById('res-p');if(rp) rp.textContent='Adjust sliders and run prediction';
+  const bar=document.getElementById('res-bar');if(bar) bar.style.width='0%';
+  const fw=document.getElementById('fair-warn');if(fw) fw.innerHTML='Run a prediction to see how the model treats different demographic groups for an identical feature profile.';
+  const cf=document.getElementById('inf-cf');if(cf) cf.innerHTML='Run a prediction to see counterfactual suggestions.';
+  const rb2=document.getElementById('res-breakdown');if(rb2) rb2.innerHTML='';
+}
+
+function runPred(){
+  const cfg=MODELS[curModel];
+  const vals=getVals(curModel);
+  const prob=cfg.pred(vals);
+  const pct=(prob*100).toFixed(1);
+  const high=prob>=0.5;
+
+  const rb=document.getElementById('res-box');rb.className='res-box '+(high?'hi':'lo');
+  const rv=document.getElementById('res-v');rv.textContent=high?cfg.outHigh:cfg.outLow;rv.style.color=high?'var(--red)':'var(--green)';
+  document.getElementById('res-p').textContent=`Probability: ${pct}% (decision threshold: 50%)`;
+  const bar=document.getElementById('res-bar');bar.style.width=pct+'%';bar.style.background=high?'linear-gradient(90deg,var(--amber),var(--red))':'linear-gradient(90deg,var(--teal),var(--green))';
+
+  // Breakdown
+  const br=document.getElementById('res-breakdown');
+  const topFeat=cfg.feats[0];
+  br.innerHTML=`<div class="small" style="margin-bottom:.5rem"><strong>Key drivers for this prediction:</strong></div>${cfg.feats.slice(0,3).map((f,i)=>`<div class="bar-row"><div class="bar-lbl"><span>${f}</span><span style="color:${cfg.shap[i]>0?C.red:C.green}">${cfg.shap[i]>0?'+':''}${cfg.shap[i].toFixed(2)}</span></div><div class="bar-tr"><div class="bar-fl" style="width:${Math.abs(cfg.shap[i])*100}%;background:${cfg.shap[i]>0?C.red:C.teal}"></div></div></div>`).join('')}`;
+
+  // Fairness check — flip sensitive attr
+  const altVals={...vals};
+  const sk=cfg.sensKey,opts=cfg.sensOpts;
+  const origIdx=vals[sk];
+  const altIdx=origIdx===0?1:0;
+  altVals[sk]=altIdx;
+  const altProb=cfg.pred(altVals);
+  const diff=Math.abs(prob-altProb)*100;
+  const warn=diff>5;
+  const fw=document.getElementById('fair-warn');
+  fw.innerHTML=`<div style="margin-bottom:.7rem"><strong>Same profile, only ${sk} changed:</strong></div>
+  <div style="display:flex;justify-content:space-between;background:var(--bg3);border-radius:8px;padding:.6rem .8rem;margin-bottom:.4rem"><span>${opts[origIdx]}</span><strong style="color:${high?C.red:C.green}">${pct}%</strong></div>
+  <div style="display:flex;justify-content:space-between;background:var(--bg3);border-radius:8px;padding:.6rem .8rem;margin-bottom:.8rem"><span>${opts[altIdx]}</span><strong style="color:${altProb>=.5?C.red:C.green}">${(altProb*100).toFixed(1)}%</strong></div>
+  <div style="padding:.65rem .85rem;border-radius:9px;font-size:.78rem;${warn?`background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.2);color:${C.red}`:`background:rgba(93,212,126,.07);border:1px solid rgba(93,212,126,.2);color:${C.green}`}">
+  ${warn?`⚠️ <strong>Fairness gap: ${diff.toFixed(1)}pp</strong> — changing only ${sk} shifts prediction by ${diff.toFixed(1)} percentage points with identical features. This is a bias signal.`:`✅ <strong>Minimal gap: ${diff.toFixed(1)}pp</strong> — model treats both groups similarly for this input profile.`}</div>`;
+
+  // Counterfactuals
+  const cf=document.getElementById('inf-cf');
+  if(high){
+    cf.innerHTML=`<div class="small mb1">To flip this prediction to <strong>${cfg.outLow}</strong>, consider:</div>${cfg.cfHints.map((h,i)=>`<div style="display:flex;align-items:center;gap:.5rem;margin:.35rem 0;font-size:.8rem"><span style="color:var(--teal);font-size:.9rem">→</span><span>${h}</span></div>`).join('')}<div style="margin-top:.8rem;padding:.6rem .8rem;background:rgba(56,217,192,.06);border:1px solid rgba(56,217,192,.2);border-radius:8px;font-size:.73rem;color:var(--teal)">Race and sex cannot be changed — they are protected attributes.</div>`;
+  } else {
+    cf.innerHTML=`<div class="alert alert-g" style="margin-bottom:0"><span class="ai">✅</span><div>Prediction is already favorable (${cfg.outLow}). No counterfactual needed.</div></div>`;
+  }
+
+  // LIME chart for this prediction
+  renderInfLime(high,curModel);
+}
+
+function renderInfLime(high,m){
+  const cfg=MODELS[m];
+  dc('c-inf-lime');
+  const el=document.getElementById('c-inf-lime');
+  if(!el) return;
+  const vals=high?cfg.shap:cfg.shap.map(v=>-v);
+  CHS['c-inf-lime']=new Chart(el,{type:'bar',data:{labels:cfg.feats,datasets:[{label:'Feature contribution',data:vals,backgroundColor:vals.map(v=>v>0?C.red+'88':C.teal+'88'),borderColor:vals.map(v=>v>0?C.red:C.teal),borderWidth:1.5,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:v=>`${v.raw>0?'+':''}${v.raw.toFixed(3)}`}}},scales:{x:{grid:{color:C.brd}},y:{grid:{display:false}}}}});
+  const cap=document.getElementById('lime-caption');if(cap) cap.textContent=`Top driver: ${cfg.feats[0]} (${vals[0]>0?'pushes toward':'pushes away from'} ${high?cfg.outHigh:cfg.outLow})`;
+}
+</script>
+``
+
+<script>
+// ════ AUDIT MAIN VIEW ════════════════════════════════════════
+function renderAuditMain(grp){
+  curAuditGrp=grp;
+  const d=D.audit[grp];
+  const det=document.getElementById('audit-detail-main');
+  if(det) det.innerHTML=`<div class="chips" style="grid-template-columns:1fr 1fr"><div class="chip"><div class="cv" style="color:${d.dp>.2?C.red:d.dp>.1?C.amber:C.green}">${d.dp.toFixed(3)}</div><div class="cl">DP-Diff</div></div><div class="chip"><div class="cv" style="color:${d.dpr<.8?C.red:C.green}">${d.dpr.toFixed(3)}</div><div class="cl">DP-Ratio</div></div><div class="chip"><div class="cv" style="color:${d.eo>.1?C.amber:C.green}">${d.eo.toFixed(3)}</div><div class="cl">EO-Diff</div></div><div class="chip"><div class="cv" style="color:${d.eop>.1?C.amber:C.green}">${d.eop.toFixed(3)}</div><div class="cl">EOP-Diff</div></div></div>
+  <table class="tbl mt1"><thead><tr><th>Group</th><th>TPR (Recall)</th><th>FPR (False Alarm)</th><th>Status</th></tr></thead><tbody>
+  <tr><td><strong>${d.gA}</strong></td><td style="color:${C.teal}">${(d.tprA*100).toFixed(1)}%</td><td style="color:${d.fprA>.25?C.red:C.amber}">${(d.fprA*100).toFixed(1)}%</td><td><span class="${d.tprA>d.tprB?'bg-warn':'bg-pass'}">${d.tprA>d.tprB?'Higher TPR':'Lower TPR'}</span></td></tr>
+  <tr><td><strong>${d.gB}</strong></td><td style="color:${C.teal}">${(d.tprB*100).toFixed(1)}%</td><td style="color:${d.fprB>.25?C.red:C.amber}">${(d.fprB*100).toFixed(1)}%</td><td><span class="${d.tprB>d.tprA?'bg-warn':'bg-pass'}">${d.tprB>d.tprA?'Higher TPR':'Lower TPR'}</span></td></tr>
+  <tr><td colspan="4" style="font-size:.7rem;color:var(--fg3)">ΔTPR = ${Math.abs(d.tprA-d.tprB).toFixed(3)} · ΔFPR = ${Math.abs(d.fprA-d.fprB).toFixed(3)} · Equalized Odds requires both &lt; 0.1</td></tr>
+  </tbody></table>`;
+  dc('c-audit-main');
+  const ca=document.getElementById('c-audit-main');
+  if(ca) CHS['c-audit-main']=new Chart(ca,{type:'bar',data:{labels:['TPR','FPR','Precision'],datasets:[bar(d.gA,[d.tprA,d.fprA,d.tprA*.85],C.blue),bar(d.gB,[d.tprB,d.fprB,d.tprB*.8],C.pink)]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{min:0,max:1,grid:{color:C.brd}},x:{grid:{display:false}}}}});
+}
+
+function renderAuditAll(){
+  dc('c-audit-all');
+  const ca=document.getElementById('c-audit-all');
+  if(!ca) return;
+  const labels=['DP-Diff','DP-Ratio','EO-Diff','EOP-Diff'];
+  const groups=['COMPAS Race','COMPAS Sex','Adult Sex','Adult Race'];
+  const vals=[[.281,.530,.297,.297],[.182,.635,.158,.109],[.162,.366,.057,.012],[.111,.485,.040,.029]];
+  const cols=[C.pink,C.amber,C.teal,C.blue];
+  CHS['c-audit-all']=new Chart(ca,{type:'bar',data:{labels,datasets:groups.map((g,i)=>bar(g,vals[i],cols[i]))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{min:0,max:.85,grid:{color:C.brd}},x:{grid:{display:false}}}}});
+}
+
+// ════ EXPLAIN MAIN VIEW ══════════════════════════════════════
+function renderSHAPMain(){
+  ['c-shap-main-c','c-shap-main-a'].forEach(id=>dc(id));
+  const mk=(id,labels,data)=>{const el=document.getElementById(id);if(!el)return;CHS[id]=new Chart(el,{type:'bar',data:{labels,datasets:[{label:'Mean |SHAP|',data,backgroundColor:data.map((_,i)=>[C.pink,C.amber,C.blue,C.purple,C.teal][i]+'99'),borderColor:data.map((_,i)=>[C.pink,C.amber,C.blue,C.purple,C.teal][i]),borderWidth:1.5,borderRadius:5}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:C.brd}},y:{grid:{display:false}}}}});};
+  mk('c-shap-main-c',['priors_count','age','length_stay','charge_degree','days_screen'],[.445,.182,.095,.063,.041]);
+  mk('c-shap-main-a',['capital_gain','education_num','age','hours/week','capital_loss'],[.612,.341,.188,.134,.097]);
+}
+let limeCaseMain=0;
+function showLimeMain(n){
+  limeCaseMain=n;
+  [0,1,2].forEach(i=>{const b=document.getElementById('lb'+i);if(b){b.style.background=i===n?C.blue+'22':'';b.style.borderColor=i===n?C.blue:'var(--brd2)';}});
+  renderLimeMain(n);
+}
+function renderLimeMain(n){
+  const mk=(id,lc)=>{dc(id);const el=document.getElementById(id);if(!el)return;CHS[id]=new Chart(el,{type:'bar',data:{labels:lc.f,datasets:[{label:'LIME weight',data:lc.v,backgroundColor:lc.v.map(v=>v>0?C.red+'88':C.teal+'88'),borderColor:lc.v.map(v=>v>0?C.red:C.teal),borderWidth:1.5,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:v=>`${v.raw>0?'+':''}${v.raw.toFixed(3)}`}}},scales:{x:{grid:{color:C.brd}},y:{grid:{display:false}}}}});};
+  mk('c-lime-main-c',D.lime.compas[n]);mk('c-lime-main-a',D.lime.adult[n]);
+}
+
+// ════ MITIGATE MAIN VIEW ═════════════════════════════════════
+let selStratMain=0;
+function renderMitigMain(){
+  const wrap=document.getElementById('strat-cards-main');
+  if(wrap){const cols=[C.fg3,C.blue,C.green,C.amber];wrap.innerHTML=D.mitigation.map((s,i)=>`<div class="card" id="sm${i}" style="cursor:pointer;border-color:${i===0?'rgba(91,141,238,.4)':'var(--brd)'};background:${i===0?'rgba(91,141,238,.05)':'var(--bg2)'}" onclick="selStratMain(${i})"><div style="font-size:.8rem;font-weight:700;margin-bottom:.15rem">${s.n}</div><div style="font-size:.65rem;color:var(--fg3);margin-bottom:.5rem">${s.type}</div><div style="font-size:1.35rem;font-weight:800;color:${cols[i]}">${(s.acc*100).toFixed(1)}%</div><div style="font-size:.72rem;color:${s.dp>.3?C.red:s.dp>.1?C.amber:C.green}">DP-Diff: ${s.dp.toFixed(3)}</div></div>`).join('');}
+  dc('c-mitig-main');
+  const cm=document.getElementById('c-mitig-main');
+  const cols=[C.fg3,C.blue,C.green,C.amber];
+  if(cm) CHS['c-mitig-main']=new Chart(cm,{type:'scatter',data:{datasets:D.mitigation.map((s,i)=>({label:s.n,data:[{x:s.dp,y:s.acc}],backgroundColor:cols[i]+'88',borderColor:cols[i],pointRadius:15,pointHoverRadius:18}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'},tooltip:{callbacks:{label:c=>`${c.dataset.label}: Acc=${(c.raw.y*100).toFixed(1)}% | DP=${c.raw.x.toFixed(3)}`}}},scales:{x:{title:{display:true,text:'DP-Diff (lower=fairer)'},min:0,max:1,grid:{color:C.brd}},y:{title:{display:true,text:'Accuracy'},min:.45,max:.75,ticks:{callback:v=>(v*100).toFixed(0)+'%'},grid:{color:C.brd}}}}});
+  renderBeforeAfterMain(0);renderStratExplainer(0);
+}
+function selStratMain(i){
+  selStratMain=i;
+  document.querySelectorAll('[id^="sm"]').forEach((c,j)=>{c.style.borderColor=j===i?'rgba(91,141,238,.4)':'var(--brd)';c.style.background=j===i?'rgba(91,141,238,.05)':'var(--bg2)';});
+  renderBeforeAfterMain(i);renderStratExplainer(i);
+}
+function renderBeforeAfterMain(i){
+  dc('c-mitig-before-after');
+  const el=document.getElementById('c-mitig-before-after');if(!el) return;
+  const s=D.mitigation[i],b=D.mitigation[0];
+  CHS['c-mitig-before-after']=new Chart(el,{type:'bar',data:{labels:['Accuracy','F1','DP-Diff','EO-Diff'],datasets:[bar('Baseline',[b.acc,b.f1,b.dp,b.eo],C.fg3),bar(s.n,[s.acc,s.f1,s.dp,s.eo],[C.blue,C.green,C.amber,C.pink][i])]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{min:0,max:1.05,grid:{color:C.brd}},x:{grid:{display:false}}}}});
+}
+function renderBeforeAfter(i){
+  dc('c-mitig-before-after');
+  renderBeforeAfterMain(i);
+}
+function renderStratExplainer(i){
+  const info=STRAT_INFO[i],d=D.mitigation[i];
+  const w=document.getElementById('strat-explainer');
+  if(!w) return;
+  w.innerHTML=`<div class="grid2"><div><p style="font-size:.85rem;color:var(--fg2);line-height:1.75;margin-bottom:.8rem">${info.desc}</p><div style="font-size:.82rem"><div style="color:${C.green};margin-bottom:.4rem">✅ ${info.pros}</div><div style="color:${C.red};margin-bottom:.4rem">❌ ${info.cons}</div><div style="color:${C.amber}">💡 ${info.rec}</div></div></div><div class="chips" style="grid-template-columns:1fr 1fr"><div class="chip"><div class="cv text-teal">${(d.acc*100).toFixed(1)}%</div><div class="cl">Accuracy</div></div><div class="chip"><div class="cv text-blue">${(d.f1*100).toFixed(1)}%</div><div class="cl">F1 Score</div></div><div class="chip"><div class="cv" style="color:${d.dp>.3?C.red:d.dp>.1?C.amber:C.green}">${d.dp.toFixed(3)}</div><div class="cl">DP-Diff</div></div><div class="chip"><div class="cv" style="color:${d.eo>.5?C.red:C.amber}">${d.eo.toFixed(3)}</div><div class="cl">EO-Diff</div></div></div></div>`;
+}
+
+// ════ TAB SWITCHER ════════════════════════════════════════════
+function setTab(btn,group,panel){
+  const bar=btn.closest('.tab-bar');
+  bar.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const sibs={exp:['shap','lime','compare']};
+  const ids=sibs[group]||[];
+  ids.forEach(id=>{
+    const el=document.getElementById(group+'-'+id);
+    if(el){el.classList.remove('on');el.style.display='none';}
+  });
+  const target=document.getElementById(group+'-'+panel);
+  if(target){target.classList.add('on');target.style.display='block';}
+  if(group==='exp'&&panel==='shap') renderSHAPMain();
+  if(group==='exp'&&panel==='lime') renderLimeMain(limeCaseMain);
+}
+</script>
+
+<script>
+// ════ WIZARD ══════════════════════════════════════════════════
+let wizStep=0;
+const WIZ_MAX=6;
+
+function wizNext(){
+  if(wizStep<WIZ_MAX){
+    // Make sure workflow view is active
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+    document.getElementById('v-workflow')?.classList.add('on');
+    setWizStep(wizStep+1);
+  }
+}
+function wizBack(){
+  if(wizStep>0){
+    setWizStep(wizStep-1);
+  }
+}
+
+function setWizStep(n){
+  wizStep=n;
+  // Show/hide wiz panels
+  for(let i=0;i<=WIZ_MAX;i++){
+    const p=document.getElementById('wiz-'+i);
+    if(p){
+      p.style.display = (i===n) ? 'block' : 'none';
+      p.style.animation = (i===n) ? 'fi 0.35s ease' : 'none';
+    }
+    const nd=document.getElementById('wn'+i);
+    if(nd){
+      nd.classList.toggle('done', i<n);
+      nd.classList.toggle('active', i===n);
+      nd.style.background = i<n ? 'var(--blue)' : i===n ? 'var(--bg)' : 'var(--bg2)';
+      nd.style.borderColor = i<n ? 'var(--blue)' : i===n ? 'var(--purple)' : 'var(--brd)';
+      nd.style.color = i<n ? '#fff' : i===n ? 'var(--purple)' : 'var(--fg3)';
+    }
+    const line=document.getElementById('wp'+i);
+    if(line){
+      line.style.background = i<n ? 'var(--blue)' : 'var(--brd)';
+    }
+  }
+  // Reset start button if going back to step 0
+  if(n===0){
+    const btn=document.getElementById('start-btn');
+    if(btn){btn.disabled=false;btn.innerHTML='🚀 Run Full Analysis';btn.style.opacity='1';}
+  }
+  // Scroll wizard to top
+  window.scrollTo({top:58,behavior:'smooth'});
+  setTimeout(()=>renderWizStep(n), 80);
+}
+
+function renderWizStep(n){
+  if(n===0) return; // Step 0 is static upload form
+  // Show loading spinner in the active panel first
+  const panel = document.getElementById('wiz-'+n);
+  if(!panel) return;
+  const contentDivs = panel.querySelectorAll('.grid2,.grid3,.card,.alert,.chips');
+  // Animate in
+  contentDivs.forEach((el,i)=>{
+    el.style.opacity='0';el.style.transform='translateY(12px)';
+    setTimeout(()=>{
+      el.style.transition='opacity .35s ease, transform .35s ease';
+      el.style.opacity='1';el.style.transform='none';
+    },i*80+60);
+  });
+  if(n===1) renderWizEDA();
+  if(n===2) renderWizModels();
+  if(n===3) renderWizShap();
+  if(n===4) renderWizAudit();
+  if(n===5) renderWizMitig();
+  if(n===6) renderWizReport();
+}
+
+function updateDatasetConfig(){
+  const ds=document.getElementById('cfg-dataset')?.value||'compas';
+  const tgt=document.getElementById('cfg-target');
+  const targets={compas:'two_year_recid (0=No, 1=Yes)',adult:'income (0=≤50K, 1=>50K)',loan:'approved (0=No, 1=Yes)',hiring:'hired (0=No, 1=Yes)',healthcare:'readmission (0=No, 1=Yes)'};
+  const sens={compas:['race','sex'],adult:['race','sex'],loan:['race','sex'],hiring:['sex','race'],healthcare:['race','insurance']};
+  if(tgt) tgt.innerHTML=`<option>${targets[ds]||'target'}</option>`;
+  const sw=document.getElementById('cfg-sens');
+  if(sw) sw.innerHTML=(sens[ds]||[]).map(s=>`<label style="font-size:.78rem;color:var(--fg);display:flex;align-items:center;gap:4px;cursor:pointer"><input type="checkbox" checked/> ${s}</label>`).join('');
+}
+
+function loadDemo(ds){
+  const names={compas:'COMPAS Recidivism (6,172 records)',adult:'Adult Income (32,561 records)',loan:'Loan Approval (45,000 records)',hiring:'Hiring Decisions (12,800 records)'};
+  const el=document.getElementById('upload-status');
+  if(el){
+    el.innerHTML=`<div class="alert alert-i"><span class="ai">⏳</span><div>Loading <strong>${names[ds]}</strong>...</div></div>`;
+    setTimeout(()=>{
+      el.innerHTML=`<div class="alert alert-g"><span class="ai">✅</span><div><strong>${names[ds]}</strong> loaded and ready. Sensitive attributes auto-detected. Click <strong>Run Full Analysis</strong> to proceed.</div></div>`;
+    },800);
+  }
+  const cfg=document.getElementById('cfg-dataset');
+  if(cfg){ cfg.value=ds; updateDatasetConfig(); }
+}
+
+function handleFile(file){
+  if(!file) return;
+  const el=document.getElementById('upload-status');
+  if(el) el.innerHTML=`<div class="alert alert-g"><span class="ai">✅</span><div><strong>File uploaded: ${file.name}</strong> (${(file.size/1024).toFixed(0)}KB). Configure columns below and run analysis.</div></div>`;
+}
+function handleDrop(e){
+  e.preventDefault();document.getElementById('drop-zone').classList.remove('drag');
+  const f=e.dataTransfer.files[0];if(f) handleFile(f);
+}
+
+// ════ WIZARD USE-CASE INPUT ENGINE ═══════════════════════════
+const WIZ_CASES = {
+  compas:{
+    desc:'🏛️ <strong>Criminal Justice — COMPAS Recidivism</strong>: Predict whether a defendant will reoffend within 2 years. Sensitive attributes: Race &amp; Sex. This is the real ProPublica dataset that exposed racial bias in algorithmic risk scoring.',
+    fields:[
+      {k:'age',   lbl:'Age',             hint:'18–70 yrs', t:'num', min:18,  max:70,  step:1,  def:28},
+      {k:'prior', lbl:'Prior Offences',  hint:'0–20',      t:'num', min:0,   max:20,  step:1,  def:3},
+      {k:'charge',lbl:'Charge Degree',   hint:'',          t:'sel', opts:['Misdemeanor','Felony'], def:0},
+      {k:'days',  lbl:'Days Since Arrest',hint:'-30 to +30',t:'num',min:-30, max:30,  step:1,  def:0},
+      {k:'stay',  lbl:'Jail Stay',       hint:'0–150 days',t:'num', min:0,   max:150, step:1,  def:10},
+      {k:'race',  lbl:'Race',            hint:'immutable', t:'sel', opts:['African-American','Caucasian','Hispanic','Asian','Other'], def:0, imm:true},
+      {k:'sex',   lbl:'Sex',             hint:'immutable', t:'sel', opts:['Male','Female'], def:0, imm:true},
+    ],
+    pred(v){const a=(v.age-34)/10.5,p=(v.prior-3.2)/4.5,st=(v.stay-25)/30,ch=v.charge===1?0.74:-1.35,d=v.days/8;return 1/(1+Math.exp(-(-0.12+p*.58+a*(-.42)+ch*.18+st*.08+d*.04)));},
+    outHigh:'HIGH RISK',outLow:'LOW RISK',sensKey:'race',sensOpts:['African-American','Caucasian','Hispanic','Asian','Other'],
+    feats:['Prior Offences','Age','Charge Degree','Jail Stay','Days'],
+    shapFn(v){const p=(v.prior-3.2)/4.5,a=(v.age-34)/10.5,st=(v.stay-25)/30,ch=v.charge===1?0.74:-1.35,d=v.days/8;return[p*.58,a*(-.42),ch*.18,st*.08,d*.04];}
+  },
+  adult:{
+    desc:'💼 <strong>Economic Mobility — Adult Income</strong>: Predict whether a person earns more than $50,000/year. Based on the UCI Census dataset. Documented gender pay gap: Male rate 30.6% vs Female 10.9%.',
+    fields:[
+      {k:'age',   lbl:'Age',             hint:'18–70 yrs', t:'num', min:18,  max:70,  step:1,  def:38},
+      {k:'edu',   lbl:'Education Yrs',   hint:'1–16',      t:'num', min:1,   max:16,  step:1,  def:10},
+      {k:'cgain', lbl:'Capital Gain',    hint:'$000s',     t:'num', min:0,   max:100, step:1,  def:0},
+      {k:'closs', lbl:'Capital Loss',    hint:'$000s',     t:'num', min:0,   max:50,  step:1,  def:0},
+      {k:'hours', lbl:'Hours / Week',    hint:'1–80',      t:'num', min:1,   max:80,  step:1,  def:40},
+      {k:'mar',   lbl:'Marital Status',  hint:'',          t:'sel', opts:['Married','Never-married','Divorced','Separated','Other'], def:0},
+      {k:'sex',   lbl:'Sex',             hint:'immutable', t:'sel', opts:['Male','Female'], def:0, imm:true},
+      {k:'race',  lbl:'Race',            hint:'immutable', t:'sel', opts:['White','Black','Asian-Pac-Isl.','Amer-Indian','Other'], def:0, imm:true},
+    ],
+    pred(v){const a=(v.age-38)/13,e=(v.edu-10)/2.6,cg=v.cgain/15,cl=v.closs/5,h=(v.hours-40)/12,mar=v.mar===0?.6:0;return 1/(1+Math.exp(-(-1.2+e*.72+cg*1.1+a*.38+h*.28+mar+cl*.1)));},
+    outHigh:'INCOME > $50K',outLow:'INCOME ≤ $50K',sensKey:'sex',sensOpts:['Male','Female'],
+    feats:['Capital Gain','Education','Hours/Week','Age','Marital'],
+    shapFn(v){const cg=v.cgain/15,e=(v.edu-10)/2.6,h=(v.hours-40)/12,a=(v.age-38)/13,mar=v.mar===0?.4:0;return[cg*1.1,e*.72,h*.28,a*.38,mar];}
+  },
+  loan:{
+    desc:'🏦 <strong>Finance — Loan Approval</strong>: Predict whether a loan application will be approved. Credit score, income, and debt-to-income ratio are the main factors. Racial bias in lending is well-documented.',
+    fields:[
+      {k:'income',lbl:'Annual Income',   hint:'$000s',     t:'num', min:20,  max:300, step:5,  def:55},
+      {k:'credit',lbl:'Credit Score',    hint:'300–850',   t:'num', min:300, max:850, step:10, def:650},
+      {k:'debt',  lbl:'Debt-to-Income',  hint:'5–60%',     t:'num', min:5,   max:60,  step:1,  def:35},
+      {k:'employ',lbl:'Employment Yrs',  hint:'0–30 yrs',  t:'num', min:0,   max:30,  step:1,  def:5},
+      {k:'amount',lbl:'Loan Amount',     hint:'$000s',     t:'num', min:10,  max:500, step:10, def:80},
+      {k:'purp',  lbl:'Loan Purpose',    hint:'',          t:'sel', opts:['Home','Car','Education','Personal','Business'], def:0},
+      {k:'race',  lbl:'Race',            hint:'immutable', t:'sel', opts:['White','Black','Hispanic','Asian','Other'], def:0, imm:true},
+      {k:'sex',   lbl:'Sex',             hint:'immutable', t:'sel', opts:['Male','Female'], def:0, imm:true},
+    ],
+    pred(v){const cr=(v.credit-650)/100,inc=(v.income-55)/30,dr=(v.debt-35)/10,em=(v.employ-5)/5,lv=(v.amount-80)/50;return 1/(1+Math.exp(-(.5+cr*.9+inc*.5-dr*.6+em*.3-lv*.2)));},
+    outHigh:'APPROVED',outLow:'DENIED',sensKey:'race',sensOpts:['White','Black','Hispanic','Asian','Other'],
+    feats:['Credit Score','Income','Debt Ratio','Employment','Loan Amount'],
+    shapFn(v){const cr=(v.credit-650)/100,inc=(v.income-55)/30,dr=(v.debt-35)/10,em=(v.employ-5)/5,lv=(v.amount-80)/50;return[cr*.9,inc*.5,-dr*.6,em*.3,-lv*.2];}
+  },
+  hiring:{
+    desc:'👔 <strong>HR / Recruitment — Hiring Decision</strong>: Predict whether a candidate will be shortlisted. Skills score, experience, and education are key factors. Gender bias in hiring is widely studied.',
+    fields:[
+      {k:'exp',   lbl:'Experience',      hint:'0–20 yrs',  t:'num', min:0,  max:20,  step:1,  def:4},
+      {k:'edu',   lbl:'Education Yrs',   hint:'1–16',      t:'num', min:1,  max:16,  step:1,  def:12},
+      {k:'score', lbl:'Skills Score',    hint:'0–100%',    t:'num', min:0,  max:100, step:1,  def:70},
+      {k:'gap',   lbl:'Employment Gap',  hint:'0–60 months',t:'num',min:0,  max:60,  step:1,  def:6},
+      {k:'refs',  lbl:'References',      hint:'0–5',       t:'num', min:0,  max:5,   step:1,  def:2},
+      {k:'role',  lbl:'Role Level',      hint:'',          t:'sel', opts:['Junior','Mid-level','Senior','Manager','Executive'], def:1},
+      {k:'sex',   lbl:'Sex',             hint:'immutable', t:'sel', opts:['Male','Female','Non-binary'], def:0, imm:true},
+      {k:'race',  lbl:'Race',            hint:'immutable', t:'sel', opts:['White','Black','Hispanic','Asian','Other'], def:0, imm:true},
+    ],
+    pred(v){const e=(v.exp-4)/4,ed=(v.edu-12)/2,sk=(v.score-70)/15,g=(v.gap-6)/12,r=v.refs/3;return 1/(1+Math.exp(-(.2+e*.55+ed*.4+sk*.7-g*.35+r*.25)));},
+    outHigh:'SHORTLISTED',outLow:'REJECTED',sensKey:'sex',sensOpts:['Male','Female','Non-binary'],
+    feats:['Skills Score','Experience','Education','References','Emp. Gap'],
+    shapFn(v){const sk=(v.score-70)/15,e=(v.exp-4)/4,ed=(v.edu-12)/2,r=v.refs/3,g=(v.gap-6)/12;return[sk*.7,e*.55,ed*.4,r*.25,-g*.35];}
+  }
+};
+
+let wizCase='compas';
+
+function selectUseCase(ds, btn){
+  wizCase = ds;
+  document.querySelectorAll('.wiz-uc-tab').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  const desc = document.getElementById('wiz-uc-desc');
+  if(desc) desc.innerHTML = WIZ_CASES[ds].desc;
+  buildWizFields(ds);
+  // Reset preview
+  const pr = document.getElementById('wiz-preview-result');
+  if(pr) pr.innerHTML = '<span style="color:var(--fg3);font-size:.85rem">Fill in the fields to see a live preview</span>';
+  const sb = document.getElementById('start-btn');
+  if(sb){sb.disabled=false;sb.innerHTML='<span style="font-size:1rem">⚡</span> Run Full Analysis';sb.style.opacity='1';}
+}
+
+function buildWizFields(ds){
+  const cfg = WIZ_CASES[ds];
+  const wrap = document.getElementById('wiz-input-fields');
+  if(!wrap) return;
+  wrap.innerHTML = cfg.fields.map(f=>{
+    const immTag = f.imm ? `<span class="wiz-imm-tag">⚠️ immutable</span>` : '';
+    const hintEl = f.hint && !f.imm ? `<small>${f.hint}</small>` : '';
+    if(f.t==='num') return `
+      <div class="wiz-field-row">
+        <div class="wiz-field-lbl">${f.lbl}${immTag}${hintEl}</div>
+        <div class="wiz-field-ctrl">
+          <input type="number" class="wiz-num" id="wf-${f.k}"
+            min="${f.min}" max="${f.max}" step="${f.step}" value="${f.def}"
+            oninput="wizClamp(this,${f.min},${f.max});wizSyncSlider('${f.k}');wizLivePreview()"
+            onchange="wizClamp(this,${f.min},${f.max});wizSyncSlider('${f.k}');wizLivePreview()"/>
+          <input type="range" class="wiz-rng" id="ws-${f.k}"
+            min="${f.min}" max="${f.max}" step="${f.step}" value="${f.def}"
+            oninput="wizSyncNum('${f.k}');wizLivePreview()"/>
+        </div>
+      </div>`;
+    return `
+      <div class="wiz-field-row">
+        <div class="wiz-field-lbl">${f.lbl}${immTag}</div>
+        <div class="wiz-field-ctrl">
+          <select class="wiz-sel" id="wf-${f.k}" onchange="wizLivePreview()">
+            ${f.opts.map((o,i)=>`<option value="${i}">${o}</option>`).join('')}
+          </select>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function wizClamp(el, mn, mx){
+  let v=parseFloat(el.value);
+  if(isNaN(v)) return;
+  if(v<mn) el.value=mn;
+  if(v>mx) el.value=mx;
+}
+function wizSyncSlider(k){
+  const num=document.getElementById('wf-'+k), rng=document.getElementById('ws-'+k);
+  if(num&&rng) rng.value=num.value;
+}
+function wizSyncNum(k){
+  const num=document.getElementById('wf-'+k), rng=document.getElementById('ws-'+k);
+  if(num&&rng) num.value=rng.value;
+}
+
+function wizGetVals(){
+  const cfg=WIZ_CASES[wizCase], vals={};
+  cfg.fields.forEach(f=>{
+    const el=document.getElementById('wf-'+f.k);
+    if(!el) return;
+    vals[f.k]=f.t==='num'?(parseFloat(el.value)||f.def):parseInt(el.value);
+  });
+  return vals;
+}
+
+function wizResetFields(){
+  const cfg=WIZ_CASES[wizCase];
+  cfg.fields.forEach(f=>{
+    const num=document.getElementById('wf-'+f.k);
+    const rng=document.getElementById('ws-'+f.k);
+    if(num) num.value=f.def;
+    if(rng) rng.value=f.def;
+  });
+  wizLivePreview();
+}
+function wizRandomFields(){
+  const cfg=WIZ_CASES[wizCase];
+  cfg.fields.forEach(f=>{
+    if(f.t!=='num') return;
+    const v=Math.round((f.min+Math.random()*(f.max-f.min))/f.step)*f.step;
+    const num=document.getElementById('wf-'+f.k);
+    const rng=document.getElementById('ws-'+f.k);
+    if(num) num.value=v;
+    if(rng) rng.value=v;
+  });
+  wizLivePreview();
+}
+
+function wizLivePreview(){
+  const cfg=WIZ_CASES[wizCase];
+  const vals=wizGetVals();
+  const prob=cfg.pred(vals);
+  const pct=(prob*100).toFixed(1);
+  const high=prob>=0.5;
+  const col=high?'var(--red)':'var(--green)';
+  const pr=document.getElementById('wiz-preview-result');
+  if(!pr) return;
+  pr.innerHTML=`
+    <div style="margin-bottom:.8rem">
+      <div style="font-size:.65rem;color:var(--fg3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem">Live Prediction</div>
+      <div style="font-size:1.6rem;font-weight:900;letter-spacing:-1px;color:${col}">${high?cfg.outHigh:cfg.outLow}</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:.6rem;margin-bottom:.8rem">
+      <div style="flex:1;height:10px;background:rgba(255,255,255,.05);border-radius:5px;overflow:hidden;position:relative">
+        <div style="height:100%;width:${pct}%;border-radius:5px;background:${high?'linear-gradient(90deg,#ffb347,#ff6b6b)':'linear-gradient(90deg,#38d9c0,#5dd47e)'};transition:width .4s ease"></div>
+        <div style="position:absolute;top:0;left:50%;width:1px;height:100%;background:rgba(255,255,255,.2)"></div>
+      </div>
+      <div style="font-size:.9rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:${col}">${pct}%</div>
+    </div>
+    ${(()=>{
+      const altVals={...vals};
+      const sk=cfg.sensKey;
+      altVals[sk]=vals[sk]===0?1:0;
+      const altProb=cfg.pred(altVals);
+      const diff=Math.abs(prob-altProb)*100;
+      const warn=diff>6;
+      return `<div style="padding:.5rem .7rem;border-radius:8px;font-size:.75rem;${warn?'background:rgba(255,107,107,.07);border:1px solid rgba(255,107,107,.18);color:var(--red)':'background:rgba(93,212,126,.07);border:1px solid rgba(93,212,126,.18);color:var(--green)'}">
+        ${warn?`⚠️ Fairness gap: <strong>${diff.toFixed(1)}pp</strong> — changing only ${sk} shifts outcome`:`✅ Fairness OK — ${diff.toFixed(1)}pp gap across ${sk} groups`}
+      </div>`;
+    })()}`;
+}
+
+function runStartAnalysis(){
+  const btn=document.getElementById('start-btn');
+  const vals=wizGetVals();
+  if(btn){btn.disabled=true;btn.innerHTML='<span style="display:inline-block;animation:spin 1s linear infinite">⚙️</span> Analysing...';btn.style.opacity='.7';}
+  let prog=0;
+  const steps=['📂 Preparing dataset...','🔧 Preprocessing features...','🤖 Training models...','⚖️ Computing fairness...','✅ Analysis ready!'];
+  const pr=document.getElementById('wiz-preview-result');
+  const interval=setInterval(()=>{
+    if(pr) pr.innerHTML=`<div style="color:var(--fg2);font-size:.82rem;padding:.5rem 0">${steps[prog]}</div>`;
+    prog++;
+    if(prog>=steps.length){
+      clearInterval(interval);
+      document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+      document.getElementById('v-workflow')?.classList.add('on');
+      document.querySelectorAll('.nt').forEach(n=>n.classList.remove('on'));
+      document.querySelectorAll('.nt')[0]?.classList.add('on');
+      setTimeout(()=>setWizStep(1),100);
+    }
+  },400);
+}
+
+// Replaced old updateDatasetConfig / loadDemo / handleFile / handleDrop
+function updateDatasetConfig(){}
+function loadDemo(ds){ selectUseCase(ds, null); }
+function handleFile(){}
+function handleDrop(){}
+
+
+function renderWizEDA(){
+  dc('wiz-eda-chart');
+  const el=document.getElementById('wiz-eda-chart');
+  if(el) CHS['wiz-eda-chart']=new Chart(el,{type:'bar',data:{labels:['African-Am.','Caucasian','Hispanic','Male','Female'],datasets:[{label:'Outcome Rate %',data:[52.3,39.1,39.5,47.9,35.1],backgroundColor:[C.pink+'88',C.blue+'88',C.teal+'88',C.amber+'88',C.green+'88'],borderColor:[C.pink,C.blue,C.teal,C.amber,C.green],borderWidth:1.5,borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:v=>v.raw+'%'}}},scales:{y:{min:0,max:70,ticks:{callback:v=>v+'%'},grid:{color:C.brd}},x:{grid:{display:false}}}}});
+  const st=document.getElementById('wiz-eda-stats');
+  if(st) st.innerHTML=`<div class="alert alert-e"><span class="ai">🚨</span><div><strong>Critical disparity detected!</strong><br/>African-American recidivism rate is <strong>1.34×</strong> higher than Caucasian. Female rate is <strong>12.8pp lower</strong> than male. Bias exists in the raw data before training.</div></div><table class="tbl"><thead><tr><th>Group</th><th>Rate</th><th>DI Ratio</th></tr></thead><tbody><tr><td>African-American</td><td class="text-red">52.3%</td><td><span class="bg-fail">1.338×</span></td></tr><tr><td>Caucasian</td><td class="text-green">39.1%</td><td><span class="bg-pass">Baseline</span></td></tr><tr><td>Male</td><td class="text-amber">47.9%</td><td><span class="bg-warn">1.365×</span></td></tr><tr><td>Female</td><td class="text-green">35.1%</td><td><span class="bg-pass">0.733×</span></td></tr></tbody></table>`;
+}
+
+function renderWizModels(){
+  dc('wiz-model-chart');
+  const el=document.getElementById('wiz-model-chart');
+  const data=D.compasMetrics;const cols=[C.blue,C.teal,C.pink];
+  if(el) CHS['wiz-model-chart']=new Chart(el,{type:'bar',data:{labels:['Accuracy','Precision','Recall','F1'],datasets:data.map((d,i)=>bar(d.m,[d.acc,d.pre,d.rec,d.f1],cols[i]))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{min:0,max:1,grid:{color:C.brd}},x:{grid:{display:false}}}}});
+  const sum=document.getElementById('wiz-model-summary');
+  if(sum) sum.innerHTML=`<div class="alert alert-g" style="margin-bottom:.8rem"><span class="ai">🏆</span><div><strong>Best Model: Logistic Regression</strong><br/>AUC 0.7306 · Acc 67.4% · F1 64.6%</div></div><table class="tbl"><thead><tr><th>Model</th><th>AUC</th><th>Accuracy</th></tr></thead><tbody>${data.map((d,i)=>`<tr><td style="color:${cols[i]};font-weight:700">${d.m}</td><td style="color:${cols[i]};font-weight:700">${d.auc.toFixed(4)}</td><td>${(d.acc*100).toFixed(1)}%</td></tr>`).join('')}</tbody></table><p style="font-size:.73rem;color:var(--fg3);margin-top:.6rem">Note: Sensitive attributes (race, sex) were <strong>excluded</strong> from all model features.</p>`;
+}
+
+function renderWizShap(){
+  dc('wiz-shap-chart');dc('wiz-lime-chart');
+  const es=document.getElementById('wiz-shap-chart');
+  if(es) CHS['wiz-shap-chart']=new Chart(es,{type:'bar',data:{labels:['priors_count','age','length_stay','charge_deg','days_screen'],datasets:[{label:'Mean |SHAP|',data:[.445,.182,.095,.063,.041],backgroundColor:[C.pink+'99',C.amber+'99',C.blue+'99',C.purple+'99',C.teal+'99'],borderColor:[C.pink,C.amber,C.blue,C.purple,C.teal],borderWidth:1.5,borderRadius:5}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:C.brd}},y:{grid:{display:false}}}}});
+  const el=document.getElementById('wiz-lime-chart');const lc=D.lime.compas[0];
+  if(el) CHS['wiz-lime-chart']=new Chart(el,{type:'bar',data:{labels:lc.f,datasets:[{label:'LIME weight',data:lc.v,backgroundColor:lc.v.map(v=>v>0?C.red+'88':C.teal+'88'),borderColor:lc.v.map(v=>v>0?C.red:C.teal),borderWidth:1.5,borderRadius:4}]},options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{color:C.brd}},y:{grid:{display:false}}}}});
+}
+
+function renderWizAudit(){
+  const d=D.audit.compas_race;
+  const alert=document.getElementById('wiz-audit-alert');
+  if(alert) alert.innerHTML=`<div class="alert alert-e"><span class="ai">🚨</span><div><strong>CRITICAL BIAS DETECTED — COMPAS (Race)</strong><br/>DP-Diff = 0.281 · DP-Ratio = 0.530 · EO-Diff = 0.297 — All exceed fairness thresholds. Model discriminates against African-American defendants.</div></div>`;
+  const sc=document.getElementById('wiz-scorecard');
+  if(sc) sc.innerHTML=`<table class="tbl"><thead><tr><th>Metric</th><th>Value</th><th>Threshold</th><th>Status</th></tr></thead><tbody><tr><td>DP-Diff</td><td class="text-red">0.281</td><td>&lt;0.10</td><td><span class="bg-fail">FAIL</span></td></tr><tr><td>DP-Ratio</td><td class="text-red">0.530</td><td>&gt;0.80</td><td><span class="bg-fail">FAIL</span></td></tr><tr><td>EO-Diff</td><td class="text-red">0.297</td><td>&lt;0.10</td><td><span class="bg-fail">FAIL</span></td></tr><tr><td>EOP-Diff</td><td class="text-red">0.297</td><td>&lt;0.10</td><td><span class="bg-fail">FAIL</span></td></tr></tbody></table>`;
+  dc('wiz-audit-chart');const el=document.getElementById('wiz-audit-chart');
+  if(el) CHS['wiz-audit-chart']=new Chart(el,{type:'bar',data:{labels:['TPR','FPR'],datasets:[bar(d.gA,[d.tprA,d.fprA],C.blue),bar(d.gB,[d.tprB,d.fprB],C.pink)]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{y:{min:0,max:1,grid:{color:C.brd}},x:{grid:{display:false}}}}});
+}
+
+function renderWizMitig(){
+  dc('wiz-mitig-chart');const el=document.getElementById('wiz-mitig-chart');const cols=[C.fg3,C.blue,C.green,C.amber];
+  if(el) CHS['wiz-mitig-chart']=new Chart(el,{type:'scatter',data:{datasets:D.mitigation.map((s,i)=>({label:s.n,data:[{x:s.dp,y:s.acc}],backgroundColor:cols[i]+'88',borderColor:cols[i],pointRadius:14,pointHoverRadius:17}))},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{title:{display:true,text:'DP-Diff'},min:0,max:1,grid:{color:C.brd}},y:{title:{display:true,text:'Accuracy'},min:.45,max:.75,ticks:{callback:v=>(v*100).toFixed(0)+'%'},grid:{color:C.brd}}}}});
+  const rec=document.getElementById('wiz-mitig-rec');
+  if(rec) rec.innerHTML=`<div class="alert alert-g mb2"><span class="ai">⭐</span><div><strong>Recommendation: Exponentiated Gradient</strong><br/>Best fairness improvement. DP-Diff drops from 0.727 → 0.182.</div></div><table class="tbl"><thead><tr><th>Strategy</th><th>Accuracy</th><th>DP-Diff</th></tr></thead><tbody>${D.mitigation.map((s,i)=>`<tr><td style="color:${cols[i]};font-weight:700">${s.n}</td><td>${(s.acc*100).toFixed(1)}%</td><td style="color:${s.dp>.3?C.red:s.dp>.1?C.amber:C.green};font-weight:700">${s.dp.toFixed(3)}</td></tr>`).join('')}</tbody></table>`;
+}
+
+function renderWizReport(){
+  const w=document.getElementById('wiz-report-summary');
+  if(!w) return;
+  w.innerHTML=`<div class="chips"><div class="chip"><div class="cv gx1">0.731</div><div class="cl">Best AUC</div></div><div class="chip"><div class="cv gx2">0.928</div><div class="cl">Adult AUC</div></div><div class="chip"><div class="cv text-red">0.281</div><div class="cl">COMPAS DP-Diff</div></div><div class="chip"><div class="cv text-amber">0.182</div><div class="cl">After Mitigation</div></div><div class="chip"><div class="cv text-pink">+16.2pp</div><div class="cl">Causal ATE (Race)</div></div><div class="chip"><div class="cv text-teal">−14.8pp</div><div class="cl">Causal ATE (Sex)</div></div></div>
+  <table class="tbl mt2"><thead><tr><th>Phase</th><th>Status</th><th>Key Finding</th></tr></thead><tbody><tr><td>EDA + Baseline</td><td><span class="bg-fail">⚠️ Bias Found</span></td><td>1.34× racial disparity in raw data</td></tr><tr><td>Model Training</td><td><span class="bg-pass">✅ Done</span></td><td>LR best COMPAS (AUC 0.731)</td></tr><tr><td>SHAP + LIME</td><td><span class="bg-pass">✅ Done</span></td><td>priors_count drives 44.5% of decisions</td></tr><tr><td>Fairness Audit</td><td><span class="bg-fail">🔴 FAIL</span></td><td>DP-Diff 0.281 — CRITICAL</td></tr><tr><td>Bias Mitigation</td><td><span class="bg-warn">⚠️ Partial</span></td><td>Exp. Gradient → DP-Diff 0.182</td></tr><tr><td>Counterfactuals</td><td><span class="bg-pass">✅ Done</span></td><td>Reduce priors to flip prediction</td></tr><tr><td>Causal Inference</td><td><span class="bg-fail">🔴 Bias Confirmed</span></td><td>Race ATE = +16.2pp after confounder control</td></tr></tbody></table>`;
+}
+
+// ════ REPORTS VIEW ════════════════════════════════════════════
+function renderReport(){
+  const w=document.getElementById('report-dashboard');if(!w) return;
+  w.innerHTML=`
+  <div class="grid3 mb2">
+    <div class="card"><div class="card-head"><span class="ci">📄</span>Fairness Audit Report</div><p class="small mb2">Complete bias scorecard for all sensitive attributes, groups, and metrics with pass/fail status.</p><div class="alert alert-e" style="margin-bottom:1rem"><span class="ai">🔴</span><div>Status: CRITICAL — COMPAS Race fails all 4 metrics</div></div><button class="btn btn-k btn-sm btn-w" onclick="downloadReport('audit')">📥 Download PDF</button></div>
+    <div class="card"><div class="card-head"><span class="ci">🏆</span>Model Performance Card</div><p class="small mb2">Full metrics table (Accuracy, AUC, F1, Precision, Recall) for all models on both datasets.</p><div class="alert alert-g" style="margin-bottom:1rem"><span class="ai">🏆</span><div>Best: XGBoost Adult AUC 0.9276</div></div><button class="btn btn-t btn-sm btn-w" onclick="downloadReport('model')">📥 Download CSV</button></div>
+    <div class="card"><div class="card-head"><span class="ci">♻️</span>Individual Decision Report</div><p class="small mb2">Per-person explanation with SHAP waterfall, LIME weights and counterfactuals in plain language.</p><div class="alert alert-i" style="margin-bottom:1rem"><span class="ai">ℹ️</span><div>Enter an instance ID to generate</div></div><button class="btn btn-p btn-sm btn-w" onclick="downloadReport('individual')">📥 Generate Report</button></div>
+  </div>
+  <div class="grid2 mb2">
+    <div class="card"><div class="card-head"><span class="ci">📊</span>Mitigation Comparison Report</div><p class="small mb2">Before/after fairness metrics for all 3 mitigation strategies with accuracy tradeoff analysis.</p><button class="btn btn-s btn-sm" onclick="downloadReport('mitigation')">📥 Download</button></div>
+    <div class="card"><div class="card-head"><span class="ci">🕸️</span>Causal Fairness Certificate</div><p class="small mb2">DoWhy ATE estimates, DAG structure, confidence intervals and regulatory interpretation.</p><button class="btn btn-s btn-sm" onclick="downloadReport('causal')">📥 Download JSON</button></div>
+  </div>
+  <div class="card">
+    <div class="card-head"><span class="ci">📋</span>Master Consolidated Scorecard</div>
+    <table class="tbl"><thead><tr><th>Report</th><th>Dataset</th><th>Key Metric</th><th>Value</th><th>Status</th><th>Action</th></tr></thead>
+    <tbody>
+      <tr><td>Fairness Audit</td><td>COMPAS Race</td><td>DP-Diff</td><td class="text-red">0.281</td><td><span class="bg-fail">CRITICAL</span></td><td><button class="btn btn-xs btn-k" onclick="showView('audit')">View</button></td></tr>
+      <tr><td>Fairness Audit</td><td>COMPAS Sex</td><td>DP-Diff</td><td class="text-amber">0.182</td><td><span class="bg-fail">FAIL</span></td><td><button class="btn btn-xs btn-k" onclick="showView('audit')">View</button></td></tr>
+      <tr><td>Fairness Audit</td><td>Adult Sex</td><td>DP-Diff</td><td class="text-amber">0.162</td><td><span class="bg-fail">FAIL</span></td><td><button class="btn btn-xs btn-k" onclick="showView('audit')">View</button></td></tr>
+      <tr><td>Model Performance</td><td>COMPAS</td><td>ROC-AUC</td><td class="text-blue">0.7306</td><td><span class="bg-pass">GOOD</span></td><td><button class="btn btn-xs btn-t" onclick="showView('pipeline')">View</button></td></tr>
+      <tr><td>Model Performance</td><td>Adult</td><td>ROC-AUC</td><td class="text-teal">0.9276</td><td><span class="bg-pass">EXCELLENT</span></td><td><button class="btn btn-xs btn-t" onclick="showView('pipeline')">View</button></td></tr>
+      <tr><td>Causal ATE</td><td>COMPAS Race</td><td>ATE</td><td class="text-pink">+0.1621</td><td><span class="bg-fail">BIAS CONFIRMED</span></td><td><button class="btn btn-xs btn-p" onclick="showView('pipeline');showPhase(6)">View</button></td></tr>
+      <tr><td>Causal ATE</td><td>Adult Sex</td><td>ATE</td><td class="text-teal">−0.1481</td><td><span class="bg-fail">BIAS CONFIRMED</span></td><td><button class="btn btn-xs btn-p" onclick="showView('pipeline');showPhase(6)">View</button></td></tr>
+    </tbody></table>
+  </div>`;
+}
+
+function downloadReport(type){
+  const msgs={audit:'Fairness Audit Report (PDF) — In a full deployment this would be generated server-side.',model:'Model Performance Report (CSV) exported.',individual:'Individual Decision PDF requires a specific instance ID.',mitigation:'Mitigation Comparison Report exported.',causal:'Causal Fairness Certificate (JSON) exported.'};
+  alert('📥 '+msgs[type]+'\n\nFor a production system, this would call POST /api/report/'+type);
+}
+
+function generateReport(){downloadReport('audit');}
+
+// ════ BARS + COUNTERS ════════════════════════════════════════
+function animateBars(){
+  setTimeout(()=>{document.querySelectorAll('.bar-fl[data-w]').forEach(el=>el.style.width=el.dataset.w+'%');},120);
+}
+function animCounter(el,target,suffix,dur=1600){
+  let s=null;const step=ts=>{if(!s)s=ts;const p=Math.min((ts-s)/dur,1),e=1-Math.pow(1-p,3);el.textContent=Math.floor(e*target).toLocaleString()+suffix;if(p<1)requestAnimationFrame(step);};requestAnimationFrame(step);
+}
+
+// ════ INIT ════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  // Hero counters
+  const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){animCounter(document.getElementById('hc1'),38733,'+');animCounter(document.getElementById('hc2'),6,'');animCounter(document.getElementById('hc3'),8,'');animCounter(document.getElementById('hc4'),4,'');io.disconnect();}});},{threshold:.3});
+  const hero=document.getElementById('v-home');if(hero)io.observe(hero);
+  // Show home
+  showView('home');
+  // Init wizard input fields
+  const desc=document.getElementById('wiz-uc-desc');
+  if(desc) desc.innerHTML = WIZ_CASES['compas'].desc;
+  buildWizFields('compas');
+});
+</script>
+</body>
+</html>

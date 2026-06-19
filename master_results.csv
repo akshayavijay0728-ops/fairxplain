@@ -1,0 +1,13 @@
+Phase,Component,Dataset,Key_Metric,Value
+Phase 2,Baseline LR,COMPAS,ROC-AUC,0.7306
+Phase 2,Baseline RF,COMPAS,ROC-AUC,0.6677
+Phase 2,Baseline XGB,COMPAS,ROC-AUC,0.7128
+Phase 4,Fairness: COMPAS Race DP-Diff,COMPAS,DP-Diff,0.281
+Phase 4,Fairness: COMPAS Sex DP-Diff,COMPAS,DP-Diff,0.182
+Phase 4,Fairness: Adult Sex DP-Diff,Adult,DP-Diff,0.1624
+Phase 4,Fairness: Adult Race DP-Diff,Adult,DP-Diff,0.1109
+Phase 5,Mitigation: Reweighing,COMPAS,DP-Diff,0.7273
+Phase 5,Mitigation: Exp.Gradient,COMPAS,DP-Diff,0.4691
+Phase 5,Mitigation: ThresholdOpt,COMPAS,DP-Diff,0.2751
+Phase 7,Causal: COMPAS Race ATE,COMPAS,ATE,0.1184
+Phase 7,Causal: Adult Sex ATE,Adult,ATE,0.1723
