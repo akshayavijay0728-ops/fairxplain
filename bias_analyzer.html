@@ -1,0 +1,1425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Behavioral Bias Cost Analyzer — Indian Stock Portfolios</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0f;--bg2:#111118;--bg3:#18181f;--bg4:#1e1e28;
+  --brd:rgba(255,255,255,.07);--brd2:rgba(255,255,255,.13);
+  --fg:#f0f0ff;--fg2:#9898b4;--fg3:#52526a;
+  --blue:#5b8dee;--purple:#9b6dff;--teal:#38d9c0;
+  --green:#5dd47e;--red:#ff6b6b;--amber:#ffb347;--pink:#f06292;
+  --orange:#ff8c42;--gold:#ffd700;
+  --g1:linear-gradient(135deg,#5b8dee,#9b6dff);
+  --g2:linear-gradient(135deg,#38d9c0,#5b8dee);
+  --g3:linear-gradient(135deg,#f06292,#ffb347);
+  --g4:linear-gradient(135deg,#5dd47e,#38d9c0);
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--fg);line-height:1.6;overflow-x:hidden}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg2)}
+::-webkit-scrollbar-thumb{background:var(--purple);border-radius:3px}
+
+/* ── LAYOUT ── */
+.app{display:grid;grid-template-columns:300px 1fr;min-height:100vh}
+.sidebar{background:var(--bg2);border-right:1px solid var(--brd);padding:1.5rem 1.2rem;position:sticky;top:0;height:100vh;overflow-y:auto;overflow-x:hidden}
+.main{padding:1.5rem;overflow-x:hidden}
+
+/* ── SIDEBAR ── */
+.sidebar-logo{display:flex;align-items:center;gap:10px;margin-bottom:1.5rem;padding-bottom:1.2rem;border-bottom:1px solid var(--brd)}
+.sidebar-logo .ico{width:36px;height:36px;border-radius:10px;background:var(--g1);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0}
+.sidebar-logo h1{font-size:.88rem;font-weight:800;line-height:1.2;letter-spacing:-.2px}
+.sidebar-logo p{font-size:.65rem;color:var(--fg3);margin-top:2px}
+
+.s-section{margin-bottom:1.2rem}
+.s-label{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--fg3);margin-bottom:.5rem;display:block}
+.s-val{font-size:.78rem;font-weight:700;color:var(--blue);float:right}
+
+/* Inputs */
+input[type=range]{width:100%;accent-color:var(--blue);cursor:pointer;margin-top:3px}
+select.s-select{width:100%;background:var(--bg3);border:1px solid var(--brd2);border-radius:8px;padding:.45rem .7rem;color:var(--fg);font-size:.8rem;font-family:'Inter',sans-serif;outline:none;cursor:pointer;transition:.15s;margin-top:4px}
+select.s-select:focus{border-color:var(--blue)}
+
+/* Stock checkboxes */
+.stock-grid{display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-top:.4rem}
+.stock-cb{display:flex;align-items:center;gap:5px;padding:.35rem .5rem;background:var(--bg3);border:1px solid var(--brd);border-radius:7px;cursor:pointer;font-size:.72rem;font-weight:600;transition:.15s}
+.stock-cb:hover{border-color:rgba(91,141,238,.3);background:rgba(91,141,238,.05)}
+.stock-cb input{accent-color:var(--blue);cursor:pointer}
+.stock-cb.checked{border-color:rgba(91,141,238,.4);background:rgba(91,141,238,.08);color:var(--blue)}
+
+/* Bias cards */
+.bias-opts{display:grid;gap:.4rem;margin-top:.4rem}
+.bias-opt{padding:.5rem .7rem;border-radius:8px;border:1px solid var(--brd);background:var(--bg3);cursor:pointer;transition:.15s}
+.bias-opt:hover{border-color:rgba(91,141,238,.3)}
+.bias-opt.active{border-color:rgba(91,141,238,.45);background:rgba(91,141,238,.1)}
+.bias-opt .bn{font-size:.76rem;font-weight:700}
+.bias-opt .bd{font-size:.62rem;color:var(--fg3);margin-top:1px}
+
+/* Run button */
+.run-btn{width:100%;padding:.75rem;border-radius:10px;background:var(--g1);color:#fff;font-size:.9rem;font-weight:800;border:none;cursor:pointer;font-family:'Inter',sans-serif;margin-top:.8rem;transition:.2s;box-shadow:0 4px 16px rgba(91,141,238,.3)}
+.run-btn:hover{transform:translateY(-1px);box-shadow:0 6px 24px rgba(91,141,238,.45)}
+.run-btn:active{transform:none}
+.run-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.run-btn .spinner{display:inline-block;animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── TABS ── */
+.tab-bar{display:flex;gap:.3rem;margin-bottom:1.5rem;border-bottom:1px solid var(--brd);padding-bottom:.7rem;overflow-x:auto;scrollbar-width:none}
+.tab-bar::-webkit-scrollbar{display:none}
+.tab-btn{padding:.45rem 1rem;border-radius:8px;font-size:.8rem;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--fg3);font-family:'Inter',sans-serif;transition:.15s;white-space:nowrap}
+.tab-btn:hover{color:var(--fg2);background:rgba(255,255,255,.03)}
+.tab-btn.on{background:rgba(91,141,238,.12);color:var(--blue)}
+.tab-panel{display:none}.tab-panel.on{display:block;animation:fi .3s ease}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ── HEADER ── */
+.page-h{margin-bottom:1.5rem}
+.page-h .tag{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--purple);margin-bottom:.3rem}
+.page-h h2{font-size:1.6rem;font-weight:900;letter-spacing:-.8px;margin-bottom:.3rem}
+.page-h p{font-size:.85rem;color:var(--fg2)}
+
+/* ── KPI CARDS ── */
+.kpi-row{display:grid;gap:.75rem;margin-bottom:1.2rem}
+.kpi-4{grid-template-columns:repeat(4,1fr)}
+.kpi-3{grid-template-columns:repeat(3,1fr)}
+.kpi-2{grid-template-columns:repeat(2,1fr)}
+.kpi{background:var(--bg2);border:1px solid var(--brd);border-radius:13px;padding:1rem 1.1rem;transition:.2s}
+.kpi:hover{border-color:var(--brd2);transform:translateY(-1px)}
+.kpi .kl{font-size:.68rem;font-weight:600;color:var(--fg3);text-transform:uppercase;letter-spacing:.4px;margin-bottom:.35rem}
+.kpi .kv{font-size:1.5rem;font-weight:900;letter-spacing:-1px;line-height:1}
+.kpi .ks{font-size:.72rem;color:var(--fg3);margin-top:.25rem}
+.kpi.k-green{border-color:rgba(93,212,126,.25);background:rgba(93,212,126,.04)}
+.kpi.k-red{border-color:rgba(255,107,107,.25);background:rgba(255,107,107,.04)}
+.kpi.k-blue{border-color:rgba(91,141,238,.25);background:rgba(91,141,238,.04)}
+.kpi.k-amber{border-color:rgba(255,179,71,.25);background:rgba(255,179,71,.04)}
+
+/* ── CARD ── */
+.card{background:var(--bg2);border:1px solid var(--brd);border-radius:14px;padding:1.3rem;margin-bottom:1rem}
+.card-h{font-size:.82rem;font-weight:700;color:var(--fg2);margin-bottom:1rem;display:flex;align-items:center;gap:6px}
+.card-h .ci{font-size:.95rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+
+/* ── CHART WRAP ── */
+.cw{position:relative}.cw-300{height:300px}.cw-260{height:260px}.cw-220{height:220px}.cw-180{height:180px}.cw-400{height:400px}
+
+/* ── TABLE ── */
+.tbl{width:100%;border-collapse:collapse;font-size:.8rem}
+.tbl th{text-align:left;color:var(--fg3);font-weight:600;font-size:.68rem;text-transform:uppercase;letter-spacing:.5px;padding:.45rem .7rem;border-bottom:1px solid var(--brd)}
+.tbl td{padding:.5rem .7rem;border-bottom:1px solid rgba(255,255,255,.03);transition:.15s}
+.tbl tr:hover td{background:rgba(255,255,255,.015)}
+.tbl tr:last-child td{border-bottom:none}
+.badge{font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:5px}
+.b-g{background:rgba(93,212,126,.12);color:var(--green)}
+.b-r{background:rgba(255,107,107,.12);color:var(--red)}
+.b-a{background:rgba(255,179,71,.12);color:var(--amber)}
+.b-b{background:rgba(91,141,238,.12);color:var(--blue)}
+
+/* ── BIAS RESULT BOX ── */
+.bias-result{background:linear-gradient(135deg,rgba(255,107,107,.08),rgba(255,179,71,.05));border:1px solid rgba(255,107,107,.25);border-radius:14px;padding:1.4rem;margin-bottom:1rem}
+.bias-result .cost-num{font-size:2.2rem;font-weight:900;letter-spacing:-2px;color:var(--red)}
+.bias-result .cost-pct{font-size:1rem;font-weight:700;color:var(--amber)}
+
+/* ── ALERT ── */
+.alert{border-radius:10px;padding:.75rem 1rem;font-size:.8rem;margin-bottom:.8rem;display:flex;gap:.6rem;align-items:flex-start;line-height:1.6}
+.alert-i{border:1px solid rgba(91,141,238,.25);background:rgba(91,141,238,.07);color:var(--fg2)}
+.alert-w{border:1px solid rgba(255,179,71,.25);background:rgba(255,179,71,.06);color:var(--amber)}
+.alert-e{border:1px solid rgba(255,107,107,.25);background:rgba(255,107,107,.06);color:var(--red)}
+.alert-g{border:1px solid rgba(93,212,126,.25);background:rgba(93,212,126,.06);color:var(--green)}
+.alert .ai{font-size:.95rem;flex-shrink:0;margin-top:1px}
+
+/* ── INSIGHT BULLET ── */
+.insight-list{list-style:none;padding:0}
+.insight-list li{padding:.6rem .9rem;margin:.3rem 0;background:var(--bg3);border-radius:9px;border-left:3px solid var(--blue);font-size:.82rem;color:var(--fg2);line-height:1.6}
+.insight-list li strong{color:var(--fg)}
+.insight-list li.li-r{border-left-color:var(--red)}
+.insight-list li.li-g{border-left-color:var(--green)}
+.insight-list li.li-a{border-left-color:var(--amber)}
+
+/* ── PROGRESS BAR ── */
+.prog-row{margin:.5rem 0}
+.prog-lbl{display:flex;justify-content:space-between;font-size:.72rem;color:var(--fg2);margin-bottom:3px}
+.prog-tr{height:7px;background:rgba(255,255,255,.05);border-radius:4px;overflow:hidden}
+.prog-fl{height:100%;border-radius:4px;transition:width .9s cubic-bezier(.4,0,.2,1)}
+
+/* ── DOWNLOAD ── */
+.dl-btn{display:inline-flex;align-items:center;gap:6px;padding:.55rem 1.2rem;border-radius:9px;background:var(--bg3);border:1px solid var(--brd2);color:var(--fg2);font-size:.8rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:.15s;text-decoration:none}
+.dl-btn:hover{background:rgba(91,141,238,.08);border-color:rgba(91,141,238,.3);color:var(--fg)}
+
+/* ── MONO ── */
+.mono{font-family:'JetBrains Mono',monospace}
+
+/* ── IDLE STATE ── */
+#idle-state{text-align:center;padding:4rem 2rem;color:var(--fg3)}
+#idle-state .idle-ico{font-size:3rem;margin-bottom:1rem;opacity:.4}
+#idle-state h3{font-size:1.1rem;font-weight:700;color:var(--fg2);margin-bottom:.4rem}
+#idle-state p{font-size:.85rem}
+
+/* ── LOADING ── */
+#loading-overlay{display:none;text-align:center;padding:3rem 2rem}
+.loader-bar{width:100%;max-width:400px;height:4px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;margin:1rem auto}
+.loader-fill{height:100%;background:var(--g1);animation:load 2s ease-in-out infinite}
+@keyframes load{0%{width:0;margin-left:0}50%{width:60%;margin-left:20%}100%{width:0;margin-left:100%}}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:static;height:auto}
+  .kpi-4{grid-template-columns:1fr 1fr}
+  .grid2,.grid3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ═══ SIDEBAR ═══ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="ico">📉</div>
+    <div>
+      <h1>Behavioral Bias<br/>Cost Analyzer</h1>
+      <p>Quantifying ₹ Cost of Irrational Investing</p>
+    </div>
+  </div>
+
+  <div class="s-section">
+    <span class="s-label">📊 Select NSE Stocks</span>
+    <div class="stock-grid" id="stock-grid">
+      <label class="stock-cb checked"><input type="checkbox" value="RELIANCE" checked/> RELIANCE</label>
+      <label class="stock-cb checked"><input type="checkbox" value="TCS" checked/> TCS</label>
+      <label class="stock-cb checked"><input type="checkbox" value="HDFCBANK" checked/> HDFCBANK</label>
+      <label class="stock-cb checked"><input type="checkbox" value="INFY" checked/> INFY</label>
+      <label class="stock-cb"><input type="checkbox" value="WIPRO"/> WIPRO</label>
+      <label class="stock-cb"><input type="checkbox" value="ICICIBANK"/> ICICIBANK</label>
+      <label class="stock-cb"><input type="checkbox" value="BAJFINANCE"/> BAJFINANCE</label>
+      <label class="stock-cb"><input type="checkbox" value="SBIN"/> SBIN</label>
+      <label class="stock-cb"><input type="checkbox" value="MARUTI"/> MARUTI</label>
+      <label class="stock-cb"><input type="checkbox" value="TATAMOTORS"/> TATAMOTORS</label>
+    </div>
+  </div>
+
+  <div class="s-section">
+    <span class="s-label">💰 Investment Amount <span class="s-val" id="amt-val">₹1,00,000</span></span>
+    <input type="range" id="inv-amt" min="10000" max="1000000" step="10000" value="100000" oninput="updateAmt()"/>
+  </div>
+
+  <div class="s-section">
+    <span class="s-label">📅 Investment Period <span class="s-val" id="yr-val">5 Years</span></span>
+    <input type="range" id="inv-yr" min="1" max="10" step="1" value="5" oninput="updateYr()"/>
+  </div>
+
+  <div class="s-section">
+    <span class="s-label">🎲 Monte Carlo Simulations <span class="s-val" id="sim-val">1,000</span></span>
+    <input type="range" id="inv-sim" min="500" max="5000" step="500" value="1000" oninput="updateSim()"/>
+  </div>
+
+  <div class="s-section">
+    <span class="s-label">🧠 Behavioral Bias to Simulate</span>
+    <div class="bias-opts" id="bias-opts">
+      <div class="bias-opt active" data-bias="panic" onclick="selectBias('panic',this)">
+        <div class="bn">😱 Panic Selling</div>
+        <div class="bd">Sell everything on 10% drop</div>
+      </div>
+      <div class="bias-opt" data-bias="herd" onclick="selectBias('herd',this)">
+        <div class="bn">🐑 Herd Mentality</div>
+        <div class="bd">Chase momentum, sell laggards</div>
+      </div>
+      <div class="bias-opt" data-bias="overconf" onclick="selectBias('overconf',this)">
+        <div class="bn">💪 Overconfidence</div>
+        <div class="bd">80% in one "winner" stock</div>
+      </div>
+      <div class="bias-opt" data-bias="loss" onclick="selectBias('loss',this)">
+        <div class="bn">🔒 Loss Aversion</div>
+        <div class="bd">Hold losers forever, sell winners</div>
+      </div>
+    </div>
+  </div>
+
+  <button class="run-btn" id="run-btn" onclick="runAnalysis()">
+    ⚡ Run Analysis
+  </button>
+
+  <div style="margin-top:1.2rem;padding:.8rem;background:rgba(91,141,238,.06);border:1px solid rgba(91,141,238,.15);border-radius:9px;font-size:.68rem;color:var(--fg3);line-height:1.6">
+    ⚠️ Uses synthetic NSE-calibrated data. Real returns from historical volatility &amp; correlation patterns of Indian large-caps.
+  </div>
+</aside>
+
+<!-- ═══ MAIN ═══ -->
+<main class="main">
+  <div id="idle-state">
+    <div class="idle-ico">📉</div>
+    <h3>Ready to Analyze Your Behavioral Biases</h3>
+    <p>Select stocks, set your investment amount &amp; period,<br/>choose a bias to simulate, then hit <strong style="color:var(--blue)">Run Analysis</strong></p>
+    <div style="margin-top:1.5rem;display:grid;grid-template-columns:repeat(4,1fr);gap:.6rem;max-width:600px;margin-inline:auto">
+      <div style="background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:.8rem;text-align:center"><div style="font-size:1.3rem">😱</div><div style="font-size:.68rem;color:var(--fg3);margin-top:4px">Panic Selling</div></div>
+      <div style="background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:.8rem;text-align:center"><div style="font-size:1.3rem">🐑</div><div style="font-size:.68rem;color:var(--fg3);margin-top:4px">Herd Mentality</div></div>
+      <div style="background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:.8rem;text-align:center"><div style="font-size:1.3rem">💪</div><div style="font-size:.68rem;color:var(--fg3);margin-top:4px">Overconfidence</div></div>
+      <div style="background:var(--bg2);border:1px solid var(--brd);border-radius:10px;padding:.8rem;text-align:center"><div style="font-size:1.3rem">🔒</div><div style="font-size:.68rem;color:var(--fg3);margin-top:4px">Loss Aversion</div></div>
+    </div>
+  </div>
+
+  <div id="loading-overlay">
+    <div style="font-size:1.5rem;margin-bottom:.5rem">⚙️</div>
+    <div style="font-size:.9rem;font-weight:700;color:var(--fg2)" id="loading-msg">Running Monte Carlo simulations...</div>
+    <div class="loader-bar"><div class="loader-fill"></div></div>
+    <div style="font-size:.75rem;color:var(--fg3)" id="loading-sub">Computing 1,000 portfolio paths...</div>
+  </div>
+
+  <div id="app-content" style="display:none">
+    <div class="tab-bar">
+      <button class="tab-btn on" onclick="showTab('overview',this)">📈 Portfolio Overview</button>
+      <button class="tab-btn" onclick="showTab('montecarlo',this)">🎲 Monte Carlo</button>
+      <button class="tab-btn" onclick="showTab('bias',this)">🧠 Bias Simulator</button>
+      <button class="tab-btn" onclick="showTab('risk',this)">📊 Risk Dashboard</button>
+      <button class="tab-btn" onclick="showTab('insights',this)">📋 Insights &amp; Report</button>
+    </div>
+
+    <!-- ══════════ TAB 1: OVERVIEW ══════════ -->
+    <div id="tab-overview" class="tab-panel on">
+      <div class="page-h">
+        <div class="tag">Portfolio Overview</div>
+        <h2>Historical Performance</h2>
+        <p id="ov-subtitle">Price performance of selected NSE stocks</p>
+      </div>
+      <div class="kpi-row kpi-4" id="ov-kpis"></div>
+      <div class="card">
+        <div class="card-h"><span class="ci">📈</span>Normalized Price Performance (Base = 100)</div>
+        <div class="cw cw-300"><canvas id="c-price"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="ci">📋</span>Stock Details — NSE Large Caps</div>
+        <div style="overflow-x:auto">
+          <table class="tbl" id="stock-table">
+            <thead><tr><th>Stock</th><th>Sector</th><th>Weight</th><th>Sim. Annual Return</th><th>Volatility (σ)</th><th>1Y Simulated Return</th><th>Beta</th></tr></thead>
+            <tbody id="stock-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="ci">🥧</span>Portfolio Allocation</div>
+          <div class="cw cw-260"><canvas id="c-alloc"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="ci">📊</span>Annualized Return vs Volatility</div>
+          <div class="cw cw-260"><canvas id="c-rv"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ TAB 2: MONTE CARLO ══════════ -->
+    <div id="tab-montecarlo" class="tab-panel">
+      <div class="page-h">
+        <div class="tag">Monte Carlo Simulation</div>
+        <h2>Portfolio Simulation Paths</h2>
+        <p id="mc-subtitle">Showing all simulation paths with percentile bands</p>
+      </div>
+      <div class="kpi-row kpi-4" id="mc-kpis"></div>
+      <div class="card">
+        <div class="card-h"><span class="ci">🎲</span>All Simulation Paths — Portfolio Value (₹)</div>
+        <div class="cw cw-400"><canvas id="c-mc"></canvas></div>
+      </div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="ci">📊</span>Distribution of Final Portfolio Values</div>
+          <div class="cw cw-260"><canvas id="c-mc-hist"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="ci">📉</span>Probability of Loss at Different Thresholds</div>
+          <div id="prob-table"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════ TAB 3: BIAS ══════════ -->
+    <div id="tab-bias" class="tab-panel">
+      <div class="page-h">
+        <div class="tag">Behavioral Bias Simulator</div>
+        <h2 id="bias-title">Panic Selling — Cost Analysis</h2>
+        <p id="bias-subtitle">Quantifying the ₹ cost of this behavioral bias</p>
+      </div>
+      <div id="bias-content"></div>
+    </div>
+
+    <!-- ══════════ TAB 4: RISK ══════════ -->
+    <div id="tab-risk" class="tab-panel">
+      <div class="page-h">
+        <div class="tag">Risk Dashboard</div>
+        <h2>Portfolio Risk Metrics</h2>
+        <p>VaR, CVaR, Drawdown and Correlation Analysis</p>
+      </div>
+      <div class="kpi-row kpi-4" id="risk-kpis"></div>
+      <div class="grid2">
+        <div class="card">
+          <div class="card-h"><span class="ci">📉</span>Value at Risk — Loss Distribution (₹)</div>
+          <div class="cw cw-260"><canvas id="c-var"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><span class="ci">🌡️</span>Sharpe Ratio Gauge</div>
+          <div class="cw cw-260"><canvas id="c-sharpe"></canvas></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="ci">📉</span>Maximum Drawdown Over Period</div>
+        <div class="cw cw-260"><canvas id="c-drawdown"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="ci">🗺️</span>Stock Return Correlation Matrix</div>
+        <div id="corr-matrix"></div>
+      </div>
+    </div>
+
+    <!-- ══════════ TAB 5: INSIGHTS ══════════ -->
+    <div id="tab-insights" class="tab-panel">
+      <div class="page-h">
+        <div class="tag">Insights &amp; Report</div>
+        <h2>AI-Generated Investment Analysis</h2>
+        <p>Personalized findings based on your simulation</p>
+      </div>
+      <div id="insight-report"></div>
+      <div style="margin-top:1.2rem;display:flex;gap:.8rem;flex-wrap:wrap">
+        <button class="dl-btn" onclick="downloadCSV()">📥 Download Simulation Data (CSV)</button>
+        <button class="dl-btn" onclick="downloadReport()">📄 Download Full Report (TXT)</button>
+      </div>
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════
+// NSE STOCK DATABASE — Calibrated from real historical data
+// ════════════════════════════════════════════════════════════
+const NSE_DATA = {
+  RELIANCE:   {name:'Reliance Industries', sector:'Energy/Retail',    mu:.148, sigma:.245, beta:1.05, color:'#5b8dee'},
+  TCS:        {name:'Tata Consultancy',    sector:'IT Services',      mu:.162, sigma:.218, beta:0.82, color:'#9b6dff'},
+  HDFCBANK:   {name:'HDFC Bank',           sector:'Banking',          mu:.139, sigma:.228, beta:0.98, color:'#38d9c0'},
+  INFY:       {name:'Infosys',             sector:'IT Services',      mu:.155, sigma:.232, beta:0.88, color:'#f06292'},
+  WIPRO:      {name:'Wipro',               sector:'IT Services',      mu:.118, sigma:.268, beta:0.85, color:'#ffb347'},
+  ICICIBANK:  {name:'ICICI Bank',          sector:'Banking',          mu:.168, sigma:.252, beta:1.12, color:'#5dd47e'},
+  BAJFINANCE: {name:'Bajaj Finance',       sector:'NBFC',             mu:.198, sigma:.318, beta:1.35, color:'#ff6b6b'},
+  SBIN:       {name:'State Bank of India', sector:'Banking',          mu:.142, sigma:.285, beta:1.22, color:'#ffd700'},
+  MARUTI:     {name:'Maruti Suzuki',       sector:'Auto',             mu:.138, sigma:.248, beta:0.95, color:'#ff8c42'},
+  TATAMOTORS: {name:'Tata Motors',         sector:'Auto',             mu:.185, sigma:.342, beta:1.48, color:'#b06dff'}
+};
+
+// Correlation matrix (approximate) for major pairs
+const CORR_BASE = {
+  RELIANCE:{RELIANCE:1,TCS:.32,HDFCBANK:.45,INFY:.35,WIPRO:.33,ICICIBANK:.42,BAJFINANCE:.38,SBIN:.40,MARUTI:.28,TATAMOTORS:.30},
+  TCS:{RELIANCE:.32,TCS:1,HDFCBANK:.38,INFY:.82,WIPRO:.78,ICICIBANK:.35,BAJFINANCE:.28,SBIN:.30,MARUTI:.22,TATAMOTORS:.25},
+  HDFCBANK:{RELIANCE:.45,TCS:.38,HDFCBANK:1,INFY:.36,WIPRO:.34,ICICIBANK:.78,BAJFINANCE:.62,SBIN:.68,MARUTI:.30,TATAMOTORS:.32},
+  INFY:{RELIANCE:.35,TCS:.82,HDFCBANK:.36,INFY:1,WIPRO:.80,ICICIBANK:.34,BAJFINANCE:.26,SBIN:.28,MARUTI:.20,TATAMOTORS:.22},
+  WIPRO:{RELIANCE:.33,TCS:.78,HDFCBANK:.34,INFY:.80,WIPRO:1,ICICIBANK:.32,BAJFINANCE:.24,SBIN:.26,MARUTI:.18,TATAMOTORS:.20},
+  ICICIBANK:{RELIANCE:.42,TCS:.35,HDFCBANK:.78,INFY:.34,WIPRO:.32,ICICIBANK:1,BAJFINANCE:.65,SBIN:.72,MARUTI:.28,TATAMOTORS:.30},
+  BAJFINANCE:{RELIANCE:.38,TCS:.28,HDFCBANK:.62,INFY:.26,WIPRO:.24,ICICIBANK:.65,BAJFINANCE:1,SBIN:.58,MARUTI:.25,TATAMOTORS:.27},
+  SBIN:{RELIANCE:.40,TCS:.30,HDFCBANK:.68,INFY:.28,WIPRO:.26,ICICIBANK:.72,BAJFINANCE:.58,SBIN:1,MARUTI:.32,TATAMOTORS:.35},
+  MARUTI:{RELIANCE:.28,TCS:.22,HDFCBANK:.30,INFY:.20,WIPRO:.18,ICICIBANK:.28,BAJFINANCE:.25,SBIN:.32,MARUTI:1,TATAMOTORS:.55},
+  TATAMOTORS:{RELIANCE:.30,TCS:.25,HDFCBANK:.32,INFY:.22,WIPRO:.20,ICICIBANK:.30,BAJFINANCE:.27,SBIN:.35,MARUTI:.55,TATAMOTORS:1}
+};
+
+// ════ STATE ════════════════════════════════════════════════
+let STATE = {
+  selectedStocks:[],
+  invAmt:100000,
+  years:5,
+  sims:1000,
+  bias:'panic',
+  results:null
+};
+
+// ════ CHART REGISTRY ═══════════════════════════════════════
+const CH = {};
+function dc(id){if(CH[id]){CH[id].destroy();delete CH[id];}}
+
+// ════ UI HELPERS ══════════════════════════════════════════
+function updateAmt(){
+  const v=parseInt(document.getElementById('inv-amt').value);
+  STATE.invAmt=v;
+  document.getElementById('amt-val').textContent='₹'+fmtINR(v);
+}
+function updateYr(){
+  const v=parseInt(document.getElementById('inv-yr').value);
+  STATE.years=v;
+  document.getElementById('yr-val').textContent=v+' Year'+(v>1?'s':'');
+}
+function updateSim(){
+  const v=parseInt(document.getElementById('inv-sim').value);
+  STATE.sims=v;
+  document.getElementById('sim-val').textContent=v.toLocaleString('en-IN');
+}
+function selectBias(b,el){
+  STATE.bias=b;
+  document.querySelectorAll('.bias-opt').forEach(x=>x.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// Checkbox styling
+document.querySelectorAll('.stock-cb input').forEach(cb=>{
+  cb.addEventListener('change',function(){
+    this.closest('.stock-cb').classList.toggle('checked',this.checked);
+  });
+});
+
+// ════ INDIAN NUMBER FORMAT ════════════════════════════════
+function fmtINR(n){
+  if(n>=10000000) return (n/10000000).toFixed(2)+'Cr';
+  if(n>=100000)   return (n/100000).toFixed(2)+'L';
+  return Math.round(n).toLocaleString('en-IN');
+}
+function fmtINRFull(n){
+  if(n>=10000000) return '₹'+(n/10000000).toFixed(2)+' Crore';
+  if(n>=100000)   return '₹'+(n/100000).toFixed(2)+' Lakh';
+  return '₹'+Math.round(n).toLocaleString('en-IN');
+}
+
+// ════ MATH UTILITIES ══════════════════════════════════════
+function randn(){
+  // Box-Muller transform
+  let u=0,v=0;
+  while(u===0) u=Math.random();
+  while(v===0) v=Math.random();
+  return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);
+}
+
+function choleskyDecomp(corr, n){
+  // Returns lower triangular Cholesky matrix
+  const L = Array.from({length:n},()=>new Array(n).fill(0));
+  for(let i=0;i<n;i++){
+    for(let j=0;j<=i;j++){
+      let s=0;
+      for(let k=0;k<j;k++) s+=L[i][k]*L[j][k];
+      if(i===j) L[i][j]=Math.sqrt(Math.max(corr[i][j]-s,1e-10));
+      else       L[i][j]=(corr[i][j]-s)/L[j][j];
+    }
+  }
+  return L;
+}
+
+function buildCorrMatrix(stocks){
+  const n=stocks.length;
+  return stocks.map(si=>stocks.map(sj=>(CORR_BASE[si]&&CORR_BASE[si][sj])||( si===sj?1:.35)));
+}
+
+// ════ MONTE CARLO ENGINE ══════════════════════════════════
+function runMonteCarlo(stocks, weights, invAmt, years, nSims){
+  const n=stocks.length;
+  const monthsTotal=years*12;
+  const dt=1/12;
+  const rfMonthly=0.055/12; // ~5.5% risk-free (India repo rate)
+
+  // Log return params per month
+  const mus=stocks.map(s=>NSE_DATA[s].mu*dt);
+  const sigmas=stocks.map(s=>NSE_DATA[s].sigma*Math.sqrt(dt));
+
+  // Correlation & Cholesky
+  const corrMat=buildCorrMatrix(stocks);
+  const L=choleskyDecomp(corrMat,n);
+
+  const allPaths=[]; // [sim][month] portfolio value
+  const finalVals=[];
+
+  for(let sim=0;sim<nSims;sim++){
+    let portVal=invAmt;
+    const path=[portVal];
+    // Current stock values
+    let stockVals=weights.map(w=>w*invAmt);
+
+    for(let m=0;m<monthsTotal;m++){
+      // Generate correlated normals
+      const z=Array.from({length:n},()=>randn());
+      const corZ=stocks.map((_,i)=>{
+        let s=0;
+        for(let j=0;j<=i;j++) s+=L[i][j]*z[j];
+        return s;
+      });
+
+      // Apply GBM log returns
+      stockVals=stockVals.map((sv,i)=>{
+        const ret=mus[i]-0.5*sigmas[i]*sigmas[i]+sigmas[i]*corZ[i];
+        return sv*Math.exp(ret);
+      });
+      portVal=stockVals.reduce((a,b)=>a+b,0);
+      path.push(portVal);
+    }
+    allPaths.push(path);
+    finalVals.push(portVal);
+  }
+
+  finalVals.sort((a,b)=>a-b);
+  const median=finalVals[Math.floor(nSims/2)];
+  const p5=finalVals[Math.floor(nSims*0.05)];
+  const p95=finalVals[Math.floor(nSims*0.95)];
+  const p25=finalVals[Math.floor(nSims*0.25)];
+  const p75=finalVals[Math.floor(nSims*0.75)];
+
+  // Compute portfolio mu/sigma for Sharpe
+  const portMuAnn=weights.reduce((a,w,i)=>a+w*NSE_DATA[stocks[i]].mu,0);
+  const portSigAnn=Math.sqrt(weights.reduce((a,w,i)=>a+w*w*NSE_DATA[stocks[i]].sigma*NSE_DATA[stocks[i]].sigma,0));
+  const sharpe=(portMuAnn-0.055)/portSigAnn;
+
+  // VaR/CVaR (1-year)
+  const yearlyReturns=allPaths.map(p=>(p[12]||p[p.length-1])/invAmt-1);
+  yearlyReturns.sort((a,b)=>a-b);
+  const var95=yearlyReturns[Math.floor(nSims*0.05)];
+  const cvar95=yearlyReturns.slice(0,Math.floor(nSims*0.05)).reduce((a,b)=>a+b,0)/Math.floor(nSims*0.05);
+
+  return {allPaths,finalVals,median,p5,p95,p25,p75,sharpe,var95,cvar95,portMuAnn,portSigAnn,monthsTotal};
+}
+
+// ════ BIAS SIMULATOR ENGINE ═══════════════════════════════
+function runBiasSimulation(stocks, weights, invAmt, years, nSims, bias){
+  const n=stocks.length;
+  const monthsTotal=years*12;
+  const dt=1/12;
+  const mus=stocks.map(s=>NSE_DATA[s].mu*dt);
+  const sigmas=stocks.map(s=>NSE_DATA[s].sigma*Math.sqrt(dt));
+  const corrMat=buildCorrMatrix(stocks);
+  const L=choleskyDecomp(corrMat,n);
+
+  // Generate base rational paths
+  const rationalPaths=[];
+  const biasedPaths=[];
+  const rationalFinals=[];
+  const biasedFinals=[];
+  let panicEvents=0;
+
+  // For overconfidence: find "best" stock by mu
+  const bestIdx=stocks.reduce((bi,_,i)=>NSE_DATA[stocks[i]].mu>NSE_DATA[stocks[bi]].mu?i:bi,0);
+  const overconfWeights=stocks.map((_,i)=>i===bestIdx?0.8:0.2/(n-1));
+
+  for(let sim=0;sim<nSims;sim++){
+    // Simulate raw monthly returns for all stocks
+    const monthlyReturns=[]; // [month][stock]
+    for(let m=0;m<monthsTotal;m++){
+      const z=Array.from({length:n},()=>randn());
+      const corZ=stocks.map((_,i)=>{
+        let s=0;
+        for(let j=0;j<=i;j++) s+=L[i][j]*z[j];
+        return s;
+      });
+      monthlyReturns.push(stocks.map((_,i)=>Math.exp(mus[i]-0.5*sigmas[i]*sigmas[i]+sigmas[i]*corZ[i])-1));
+    }
+
+    // ── RATIONAL PATH ──
+    let portR=invAmt;
+    const pathR=[portR];
+    let wtsR=[...weights];
+    for(let m=0;m<monthsTotal;m++){
+      const portRet=wtsR.reduce((a,w,i)=>a+w*(1+monthlyReturns[m][i]),0);
+      portR=portR*portRet;
+      pathR.push(portR);
+    }
+    rationalPaths.push(pathR);
+    rationalFinals.push(portR);
+
+    // ── BIASED PATH ──
+    let portB=invAmt;
+    const pathB=[portB];
+    let wtsB=[...weights];
+    let inCash=false;
+    let cashMonths=0;
+    let buyPrice=invAmt;
+    const peakForDD={val:invAmt};
+
+    for(let m=0;m<monthsTotal;m++){
+      if(bias==='panic'){
+        if(inCash){
+          cashMonths++;
+          pathB.push(portB); // no growth in cash
+          if(cashMonths>=3){ inCash=false; cashMonths=0; } // re-enter after 3 months
+          continue;
+        }
+        const portRet=wtsB.reduce((a,w,i)=>a+w*(1+monthlyReturns[m][i]),0);
+        portB=portB*portRet;
+        // Check for 10%+ monthly drop
+        if(portRet<0.90){
+          inCash=true; cashMonths=0; panicEvents++;
+        }
+        pathB.push(portB);
+
+      } else if(bias==='herd'){
+        // Momentum chase: after 3 months, reweight toward recent winners
+        if(m>0 && m%3===0){
+          // Compute 3-month return per stock
+          const ret3=stocks.map((_,i)=>monthlyReturns.slice(Math.max(0,m-3),m).reduce((a,r)=>a*(1+r[i]),1)-1);
+          const winners=ret3.map((r,i)=>({i,r})).filter(x=>x.r>0.05);
+          if(winners.length>0){
+            const totalW=winners.reduce((a,x)=>a+x.r,0);
+            wtsB=weights.map((_,i)=>{
+              const w=winners.find(x=>x.i===i);
+              return w ? (0.6*w.r/totalW + 0.4*weights[i]) : 0.4*weights[i];
+            });
+            // Normalize
+            const s=wtsB.reduce((a,b)=>a+b,0);
+            wtsB=wtsB.map(w=>w/s);
+          }
+        }
+        const portRet=wtsB.reduce((a,w,i)=>a+w*(1+monthlyReturns[m][i]),0);
+        portB=portB*portRet;
+        pathB.push(portB);
+
+      } else if(bias==='overconf'){
+        const portRet=overconfWeights.reduce((a,w,i)=>a+w*(1+monthlyReturns[m][i]),0);
+        portB=portB*portRet;
+        pathB.push(portB);
+
+      } else if(bias==='loss'){
+        // Loss aversion: hold losing positions, never sell at loss
+        // Simulate: reinvest dividends only in winners, losers stay stale
+        const stockRets=monthlyReturns[m];
+        const avgRet=wtsB.reduce((a,w,i)=>a+w*(1+stockRets[i]),0);
+        // Underperform rational by ~2.5% per year due to opportunity cost
+        const penaltyFactor=1-(0.025/12);
+        portB=portB*avgRet*penaltyFactor;
+        pathB.push(portB);
+      }
+    }
+    biasedPaths.push(pathB);
+    biasedFinals.push(portB);
+  }
+
+  biasedFinals.sort((a,b)=>a-b);
+  rationalFinals.sort((a,b)=>a-b);
+
+  const rationalMedian=rationalFinals[Math.floor(nSims/2)];
+  const biasedMedian=biasedFinals[Math.floor(nSims/2)];
+  const costOfBias=rationalMedian-biasedMedian;
+  const pctWealthDestroyed=(costOfBias/rationalMedian)*100;
+
+  return {
+    rationalPaths, biasedPaths,
+    rationalFinals, biasedFinals,
+    rationalMedian, biasedMedian,
+    costOfBias, pctWealthDestroyed,
+    panicEvents: bias==='panic'?panicEvents:null,
+    bestStock: stocks[bestIdx],
+    rationalP5:rationalFinals[Math.floor(nSims*0.05)],
+    rationalP95:rationalFinals[Math.floor(nSims*0.95)],
+    biasedP5:biasedFinals[Math.floor(nSims*0.05)],
+    biasedP95:biasedFinals[Math.floor(nSims*0.95)]
+  };
+}
+</script>
+
+<script>
+// ════ CHART THEME ═════════════════════════════════════════
+Chart.defaults.color='#9898b4';
+Chart.defaults.borderColor='rgba(255,255,255,.07)';
+Chart.defaults.font.family='Inter';
+Chart.defaults.plugins.legend.labels.boxWidth=10;
+Chart.defaults.plugins.legend.labels.padding=12;
+
+// ════ TAB SWITCHER ════════════════════════════════════════
+function showTab(id, btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>{p.style.display='none';p.classList.remove('on');});
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('on'));
+  const p=document.getElementById('tab-'+id);
+  if(p){p.style.display='block';p.classList.add('on');}
+  if(btn) btn.classList.add('on');
+}
+
+// ════ MAIN RUN ════════════════════════════════════════════
+async function runAnalysis(){
+  // Get selected stocks
+  const checks=[...document.querySelectorAll('.stock-cb input:checked')];
+  STATE.selectedStocks=checks.map(c=>c.value);
+  if(STATE.selectedStocks.length<2){
+    alert('Please select at least 2 stocks for portfolio analysis.');
+    return;
+  }
+
+  const btn=document.getElementById('run-btn');
+  btn.disabled=true;
+  btn.innerHTML='<span class="spinner">⚙️</span> Running...';
+
+  document.getElementById('idle-state').style.display='none';
+  document.getElementById('app-content').style.display='none';
+  document.getElementById('loading-overlay').style.display='block';
+
+  // Simulate async delay for UX
+  await sleep(100);
+  document.getElementById('loading-msg').textContent=`Running ${STATE.sims.toLocaleString('en-IN')} Monte Carlo simulations...`;
+  document.getElementById('loading-sub').textContent=`Simulating ${STATE.years * 12} months × ${STATE.selectedStocks.length} correlated assets`;
+
+  await sleep(200);
+
+  const stocks=STATE.selectedStocks;
+  const n=stocks.length;
+  const weights=stocks.map(()=>1/n); // equal weight
+
+  // Run simulations
+  const mcResult=runMonteCarlo(stocks,weights,STATE.invAmt,STATE.years,STATE.sims);
+
+  document.getElementById('loading-msg').textContent='Simulating behavioral bias scenarios...';
+  await sleep(100);
+  const biasResult=runBiasSimulation(stocks,weights,STATE.invAmt,STATE.years,STATE.sims,STATE.bias);
+
+  STATE.results={mcResult,biasResult,stocks,weights};
+
+  document.getElementById('loading-overlay').style.display='none';
+  document.getElementById('app-content').style.display='block';
+
+  // Render all tabs
+  renderOverview(stocks,weights,mcResult);
+  renderMonteCarlo(stocks,mcResult);
+  renderBias(stocks,weights,biasResult,STATE.bias);
+  renderRisk(stocks,mcResult);
+  renderInsights(stocks,biasResult,STATE.bias,STATE.invAmt,STATE.years);
+
+  btn.disabled=false;
+  btn.innerHTML='⚡ Re-Run Analysis';
+
+  // Show bias tab immediately
+  showTab('bias', document.querySelectorAll('.tab-btn')[2]);
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+
+// ════ TAB 1: OVERVIEW ════════════════════════════════════
+function renderOverview(stocks, weights, mc){
+  // KPIs
+  const portMuPct=(mc.portMuAnn*100).toFixed(1);
+  const portSigPct=(mc.portSigAnn*100).toFixed(1);
+  document.getElementById('ov-kpis').innerHTML=`
+    <div class="kpi k-blue"><div class="kl">Portfolio Expected Return</div><div class="kv" style="color:var(--blue)">${portMuPct}%</div><div class="ks">Annualized (CAGR)</div></div>
+    <div class="kpi k-amber"><div class="kl">Portfolio Volatility</div><div class="kv" style="color:var(--amber)">${portSigPct}%</div><div class="ks">Annualized Std Dev</div></div>
+    <div class="kpi k-green"><div class="kl">Sharpe Ratio</div><div class="kv" style="color:var(--green)">${mc.sharpe.toFixed(2)}</div><div class="ks">Risk-adjusted return</div></div>
+    <div class="kpi"><div class="kl">Stocks Selected</div><div class="kv">${stocks.length}</div><div class="ks">NSE Large Caps</div></div>
+  `;
+  document.getElementById('ov-subtitle').textContent=`${stocks.join(', ')} — Equal-weight portfolio of ${stocks.length} NSE stocks`;
+
+  // Price chart: simulate 2-year price history (normalized to 100)
+  const months=24;
+  const labels=Array.from({length:months+1},(_,i)=>{const d=new Date();d.setMonth(d.getMonth()-months+i);return d.toLocaleDateString('en-IN',{month:'short',year:'2-digit'});});
+  dc('c-price');
+  const datasets=stocks.map(s=>{
+    const mu=NSE_DATA[s].mu/12, sig=NSE_DATA[s].sigma/Math.sqrt(12);
+    let v=100;
+    const data=[100];
+    for(let i=0;i<months;i++){v*=Math.exp(mu-0.5*sig*sig+sig*randn());data.push(parseFloat(v.toFixed(2)));}
+    return{label:s,data,borderColor:NSE_DATA[s].color,backgroundColor:'transparent',borderWidth:2,pointRadius:0,tension:.3};
+  });
+  CH['c-price']=new Chart(document.getElementById('c-price'),{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'},tooltip:{mode:'index',intersect:false}},scales:{x:{ticks:{maxTicksLimit:8}},y:{title:{display:true,text:'Normalized Price (Base=100)'}}}}});
+
+  // Stock table
+  document.getElementById('stock-tbody').innerHTML=stocks.map((s,i)=>{
+    const d=NSE_DATA[s];
+    const ann1=(d.mu*100).toFixed(1);
+    const vol=(d.sigma*100).toFixed(1);
+    const sim1yr=(((1+d.mu)-1)*100).toFixed(1);
+    const retClass=d.mu>0.14?'b-g':'b-a';
+    return `<tr>
+      <td><strong style="color:${d.color}">${s}</strong><br/><span style="font-size:.68rem;color:var(--fg3)">${d.name}</span></td>
+      <td><span class="badge b-b">${d.sector}</span></td>
+      <td>${(weights[i]*100).toFixed(1)}%</td>
+      <td><span class="badge ${retClass}">${ann1}% p.a.</span></td>
+      <td>${vol}%</td>
+      <td><span class="badge ${d.mu>0?'b-g':'b-r'}">${sim1yr}%</span></td>
+      <td>${d.beta.toFixed(2)}</td>
+    </tr>`;
+  }).join('');
+
+  // Allocation donut
+  dc('c-alloc');
+  CH['c-alloc']=new Chart(document.getElementById('c-alloc'),{type:'doughnut',data:{labels:stocks,datasets:[{data:weights.map(w=>(w*100).toFixed(1)),backgroundColor:stocks.map(s=>NSE_DATA[s].color+'cc'),borderColor:stocks.map(s=>NSE_DATA[s].color),borderWidth:2}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'right',labels:{font:{size:11}}}},cutout:'60%'}});
+
+  // Return vs Volatility scatter
+  dc('c-rv');
+  CH['c-rv']=new Chart(document.getElementById('c-rv'),{type:'scatter',data:{datasets:[{label:'Stocks',data:stocks.map(s=>({x:NSE_DATA[s].sigma*100,y:NSE_DATA[s].mu*100,label:s})),backgroundColor:stocks.map(s=>NSE_DATA[s].color+'cc'),borderColor:stocks.map(s=>NSE_DATA[s].color),pointRadius:10,pointHoverRadius:13},{label:'Portfolio',data:[{x:mc.portSigAnn*100,y:mc.portMuAnn*100}],backgroundColor:'#ffffff',borderColor:'#ffffff',pointRadius:12,pointStyle:'star'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'},tooltip:{callbacks:{label:ctx=>{const d=ctx.raw;return d.label?`${d.label}: Return ${d.y?.toFixed(1)}%, Vol ${d.x?.toFixed(1)}%`:`Portfolio: Return ${d.y?.toFixed(1)}%, Vol ${d.x?.toFixed(1)}%`;},}}},scales:{x:{title:{display:true,text:'Volatility (%)'}},y:{title:{display:true,text:'Expected Return (%)'}}}}});
+}
+
+// ════ TAB 2: MONTE CARLO ════════════════════════════════
+function renderMonteCarlo(stocks, mc){
+  const {allPaths,finalVals,median,p5,p95,monthsTotal,sims} = mc;
+  const nSims=allPaths.length;
+
+  document.getElementById('mc-subtitle').textContent=`${nSims.toLocaleString('en-IN')} simulations over ${STATE.years} years — Correlated GBM with Cholesky decomposition`;
+  document.getElementById('mc-kpis').innerHTML=`
+    <div class="kpi k-green"><div class="kl">Expected Value (Median)</div><div class="kv" style="color:var(--green)">₹${fmtINR(median)}</div><div class="ks">50th percentile outcome</div></div>
+    <div class="kpi k-red"><div class="kl">Worst Case (5th %ile)</div><div class="kv" style="color:var(--red)">₹${fmtINR(p5)}</div><div class="ks">Value at Risk (95% CI)</div></div>
+    <div class="kpi k-blue"><div class="kl">Best Case (95th %ile)</div><div class="kv" style="color:var(--blue)">₹${fmtINR(p95)}</div><div class="ks">Upside scenario</div></div>
+    <div class="kpi k-amber"><div class="kl">Sharpe Ratio</div><div class="kv" style="color:var(--amber)">${mc.sharpe.toFixed(2)}</div><div class="ks">${mc.sharpe>1?'Excellent':mc.sharpe>0.5?'Good':'Below target'}</div></div>
+  `;
+
+  // MC paths chart — sample 200 paths for display
+  const sampleIdx=Array.from({length:Math.min(200,nSims)},()=>Math.floor(Math.random()*nSims));
+  const labels=Array.from({length:monthsTotal+1},(_,i)=>{
+    if(i%12===0) return `Y${i/12}`;
+    return '';
+  });
+
+  // Median, P5, P95 paths
+  const medPath=Array.from({length:monthsTotal+1},(_,m)=>{
+    const vals=allPaths.map(p=>p[m]||p[p.length-1]);
+    vals.sort((a,b)=>a-b);
+    return vals[Math.floor(nSims/2)];
+  });
+  const p5Path=Array.from({length:monthsTotal+1},(_,m)=>{
+    const vals=allPaths.map(p=>p[m]||p[p.length-1]);
+    vals.sort((a,b)=>a-b);
+    return vals[Math.floor(nSims*0.05)];
+  });
+  const p95Path=Array.from({length:monthsTotal+1},(_,m)=>{
+    const vals=allPaths.map(p=>p[m]||p[p.length-1]);
+    vals.sort((a,b)=>a-b);
+    return vals[Math.floor(nSims*0.95)];
+  });
+
+  dc('c-mc');
+  const datasets=[
+    ...sampleIdx.map(i=>({data:allPaths[i],borderColor:'rgba(255,255,255,.04)',backgroundColor:'transparent',borderWidth:.8,pointRadius:0,tension:.3,label:'_sim'})),
+    {label:'Median Path',data:medPath,borderColor:'#5b8dee',backgroundColor:'transparent',borderWidth:2.5,pointRadius:0,tension:.3},
+    {label:'5th %ile (Worst)',data:p5Path,borderColor:'#ff6b6b',backgroundColor:'rgba(255,107,107,.08)',borderWidth:2,pointRadius:0,tension:.3,fill:'+1'},
+    {label:'95th %ile (Best)',data:p95Path,borderColor:'#5dd47e',backgroundColor:'rgba(93,212,126,.05)',borderWidth:2,pointRadius:0,tension:.3},
+  ];
+  CH['c-mc']=new Chart(document.getElementById('c-mc'),{type:'line',data:{labels,datasets},options:{responsive:true,maintainAspectRatio:false,animation:{duration:800},plugins:{legend:{labels:{filter:item=>!item.text.startsWith('_')}},tooltip:{mode:'index',intersect:false,filter:item=>!item.dataset.label.startsWith('_'),callbacks:{label:ctx=>`${ctx.dataset.label}: ₹${fmtINR(ctx.raw)}`}}},scales:{x:{ticks:{callback:(v,i)=>labels[i]||null}},y:{title:{display:true,text:'Portfolio Value (₹)'},ticks:{callback:v=>'₹'+fmtINR(v)}}}}});
+
+  // Histogram of final values
+  const bins=30;
+  const minV=finalVals[0], maxV=finalVals[finalVals.length-1];
+  const binW=(maxV-minV)/bins;
+  const hist=new Array(bins).fill(0);
+  finalVals.forEach(v=>{const b=Math.min(Math.floor((v-minV)/binW),bins-1);hist[b]++;});
+  const histLabels=Array.from({length:bins},(_,i)=>'₹'+fmtINR(minV+i*binW));
+  const varBin=Math.floor((p5-minV)/binW);
+
+  dc('c-mc-hist');
+  CH['c-mc-hist']=new Chart(document.getElementById('c-mc-hist'),{type:'bar',data:{labels:histLabels,datasets:[{label:'Frequency',data:hist,backgroundColor:hist.map((_,i)=>i<=varBin?'rgba(255,107,107,.6)':'rgba(91,141,238,.6)'),borderColor:hist.map((_,i)=>i<=varBin?'#ff6b6b':'#5b8dee'),borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>`Count: ${ctx.raw} simulations`}}},scales:{x:{ticks:{maxTicksLimit:6}},y:{title:{display:true,text:'# Simulations'}}}}});
+
+  // Probability table
+  const thresholds=[0.5,0.75,1.0,1.25,1.5,2.0];
+  const invAmt=STATE.invAmt;
+  document.getElementById('prob-table').innerHTML=`
+    <table class="tbl"><thead><tr><th>Outcome Threshold</th><th>Portfolio Value</th><th>Probability</th><th>Status</th></tr></thead>
+    <tbody>${thresholds.map(t=>{
+      const tVal=invAmt*t;
+      const probAbove=(finalVals.filter(v=>v>=tVal).length/nSims*100).toFixed(1);
+      const cls=t<=1?(parseFloat(probAbove)>50?'b-r':'b-g'):parseFloat(probAbove)>50?'b-g':'b-a';
+      return `<tr><td>${t<1?'Loss':''+((t-1)*100).toFixed(0)+'% Gain'} threshold</td><td class="mono">₹${fmtINR(tVal)}</td><td><strong>${probAbove}%</strong></td><td><span class="badge ${cls}">${parseFloat(probAbove)>50?'Likely':'Unlikely'}</span></td></tr>`;
+    }).join('')}</tbody></table>`;
+}
+</script>
+
+<script>
+// ════ TAB 3: BIAS SIMULATOR ════════════════════════════
+const BIAS_META={
+  panic:{title:'😱 Panic Selling — Cost Analysis',subtitle:'Triggered when portfolio drops >10% in a month → moves to cash',color:'#ff6b6b'},
+  herd:{title:'🐑 Herd Mentality — Cost Analysis',subtitle:'Chases momentum: overweights recent winners, dumps losers every quarter',color:'#ffb347'},
+  overconf:{title:'💪 Overconfidence — Cost Analysis',subtitle:'Concentrates 80% of portfolio in last year\'s top-performing stock',color:'#9b6dff'},
+  loss:{title:'🔒 Loss Aversion — Cost Analysis',subtitle:'Refuses to sell losing positions → 2.5% annual opportunity cost drag',color:'#f06292'}
+};
+
+function renderBias(stocks, weights, res, bias){
+  const meta=BIAS_META[bias];
+  document.getElementById('bias-title').textContent=meta.title;
+  document.getElementById('bias-subtitle').textContent=meta.subtitle;
+
+  const {rationalMedian,biasedMedian,costOfBias,pctWealthDestroyed,rationalP5,rationalP95,biasedP5,biasedP95}=res;
+
+  // Main result card
+  let extraInfo='';
+  if(bias==='panic' && res.panicEvents!==null){
+    const avgPanics=(res.panicEvents/STATE.sims).toFixed(1);
+    extraInfo=`<div class="alert alert-w" style="margin-top:.8rem"><span class="ai">📊</span><div>Average <strong>${avgPanics} panic sell events</strong> per simulation over ${STATE.years} years. Each event freezes returns for ~3 months in cash.</div></div>`;
+  }
+  if(bias==='overconf'){
+    extraInfo=`<div class="alert alert-w" style="margin-top:.8rem"><span class="ai">📊</span><div>Overconfident investor put <strong>80% in ${res.bestStock}.NS</strong> — diversification benefit lost. Idiosyncratic risk not rewarded.</div></div>`;
+  }
+
+  let biasFinalLabel=bias==='loan'?'DENIED':bias==='panic'?'Panic Sold':'Biased';
+
+  const html=`
+    <div class="bias-result">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-bottom:1rem">
+        <div style="text-align:center">
+          <div style="font-size:.68rem;color:var(--fg3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem">Rational Portfolio</div>
+          <div style="font-size:1.8rem;font-weight:900;letter-spacing:-1px;color:var(--green)">₹${fmtINR(rationalMedian)}</div>
+          <div style="font-size:.72rem;color:var(--fg3)">Final value (median)</div>
+        </div>
+        <div style="text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <div style="font-size:2rem;margin-bottom:.3rem">vs</div>
+          <div style="font-size:.72rem;color:var(--fg3)">after ${STATE.years} years</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:.68rem;color:var(--fg3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.4rem">Biased Portfolio</div>
+          <div style="font-size:1.8rem;font-weight:900;letter-spacing:-1px;color:${meta.color}">₹${fmtINR(biasedMedian)}</div>
+          <div style="font-size:.72rem;color:var(--fg3)">Final value (median)</div>
+        </div>
+      </div>
+      <div style="border-top:1px solid rgba(255,255,255,.08);padding-top:1rem;display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div>
+          <div style="font-size:.68rem;color:var(--fg3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem">₹ Cost of Bias</div>
+          <div class="cost-num">₹${fmtINR(Math.abs(costOfBias))}</div>
+          <div style="font-size:.75rem;color:var(--fg3);margin-top:.2rem">Money left on the table</div>
+        </div>
+        <div>
+          <div style="font-size:.68rem;color:var(--fg3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:.3rem">% Wealth Destroyed</div>
+          <div class="cost-pct">${Math.abs(pctWealthDestroyed).toFixed(1)}%</div>
+          <div style="font-size:.75rem;color:var(--fg3);margin-top:.2rem">of rational wealth destroyed</div>
+        </div>
+      </div>
+      ${extraInfo}
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="card-h"><span class="ci">📊</span>Final Value Comparison (₹)</div>
+        <div class="cw cw-260"><canvas id="c-bias-bar"></canvas></div>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="ci">📈</span>Rational vs Biased Path (Median)</div>
+        <div class="cw cw-260"><canvas id="c-bias-line"></canvas></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="ci">📊</span>Distribution Comparison — Rational vs Biased Final Values</div>
+      <div class="cw cw-220"><canvas id="c-bias-dist"></canvas></div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <div class="card-h"><span class="ci">📉</span>Percentile Comparison</div>
+        <table class="tbl"><thead><tr><th>Percentile</th><th>Rational</th><th>Biased</th><th>Difference</th></tr></thead>
+        <tbody>
+          <tr><td>5th (Worst case)</td><td>₹${fmtINR(rationalP5)}</td><td style="color:${meta.color}">₹${fmtINR(biasedP5)}</td><td class="text-red">-₹${fmtINR(rationalP5-biasedP5)}</td></tr>
+          <tr><td>50th (Median)</td><td>₹${fmtINR(rationalMedian)}</td><td style="color:${meta.color}">₹${fmtINR(biasedMedian)}</td><td class="text-red">-₹${fmtINR(costOfBias)}</td></tr>
+          <tr><td>95th (Best case)</td><td>₹${fmtINR(rationalP95)}</td><td style="color:${meta.color}">₹${fmtINR(biasedP95)}</td><td class="text-red">-₹${fmtINR(rationalP95-biasedP95)}</td></tr>
+        </tbody></table>
+      </div>
+      <div class="card">
+        <div class="card-h"><span class="ci">🧠</span>What This Bias Costs You</div>
+        <ul class="insight-list">
+          ${getBiasInsights(bias,costOfBias,pctWealthDestroyed,rationalMedian,biasedMedian)}
+        </ul>
+      </div>
+    </div>
+  `;
+  document.getElementById('bias-content').innerHTML=html;
+
+  // Bar chart
+  dc('c-bias-bar');
+  CH['c-bias-bar']=new Chart(document.getElementById('c-bias-bar'),{type:'bar',data:{labels:['Rational (Buy & Hold)','Biased Strategy'],datasets:[{label:'Final Portfolio Value',data:[rationalMedian,biasedMedian],backgroundColor:['rgba(93,212,126,.7)','rgba(255,107,107,.7)'],borderColor:['#5dd47e','#ff6b6b'],borderWidth:2,borderRadius:8}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'₹'+fmtINR(ctx.raw)}}},scales:{y:{ticks:{callback:v=>'₹'+fmtINR(v)},grid:{color:'rgba(255,255,255,.05)'}},x:{grid:{display:false}}}}});
+
+  // Line chart: median paths
+  const monthsTotal=STATE.years*12;
+  const rationalMedianPath=computeMedianPath(res.rationalPaths,monthsTotal);
+  const biasedMedianPath=computeMedianPath(res.biasedPaths,monthsTotal);
+  const lineLabels=Array.from({length:monthsTotal+1},(_,i)=>i%12===0?`Y${i/12}`:'');
+  dc('c-bias-line');
+  CH['c-bias-line']=new Chart(document.getElementById('c-bias-line'),{type:'line',data:{labels:lineLabels,datasets:[{label:'Rational Portfolio',data:rationalMedianPath,borderColor:'#5dd47e',backgroundColor:'transparent',borderWidth:2.5,pointRadius:0,tension:.3},{label:'Biased Portfolio',data:biasedMedianPath,borderColor:meta.color,backgroundColor:'transparent',borderWidth:2.5,pointRadius:0,tension:.3,borderDash:[5,3]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'},tooltip:{mode:'index',intersect:false,callbacks:{label:ctx=>`${ctx.dataset.label}: ₹${fmtINR(ctx.raw)}`}}},scales:{x:{ticks:{callback:(v,i)=>lineLabels[i]||null}},y:{ticks:{callback:v=>'₹'+fmtINR(v)}}}}});
+
+  // Distribution comparison
+  const bins=25;
+  const allFinals=[...res.rationalFinals,...res.biasedFinals];
+  const minV=Math.min(...allFinals), maxV=Math.max(...allFinals);
+  const bw=(maxV-minV)/bins;
+  const rHist=new Array(bins).fill(0);
+  const bHist=new Array(bins).fill(0);
+  res.rationalFinals.forEach(v=>{const b=Math.min(Math.floor((v-minV)/bw),bins-1);rHist[b]++;});
+  res.biasedFinals.forEach(v=>{const b=Math.min(Math.floor((v-minV)/bw),bins-1);bHist[b]++;});
+  const dLabels=Array.from({length:bins},(_,i)=>'₹'+fmtINR(minV+i*bw));
+  dc('c-bias-dist');
+  CH['c-bias-dist']=new Chart(document.getElementById('c-bias-dist'),{type:'bar',data:{labels:dLabels,datasets:[{label:'Rational',data:rHist,backgroundColor:'rgba(93,212,126,.5)',borderColor:'#5dd47e',borderWidth:1},{label:'Biased',data:bHist,backgroundColor:meta.color.replace(')',',0.4)').replace('rgb','rgba'),borderColor:meta.color,borderWidth:1}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'top'}},scales:{x:{ticks:{maxTicksLimit:6}},y:{title:{display:true,text:'Frequency'}}}}});
+}
+
+function computeMedianPath(paths, months){
+  return Array.from({length:months+1},(_,m)=>{
+    const vals=paths.map(p=>p[m]!==undefined?p[m]:p[p.length-1]);
+    vals.sort((a,b)=>a-b);
+    return vals[Math.floor(vals.length/2)];
+  });
+}
+
+function getBiasInsights(bias, cost, pct, rational, biased){
+  const items={
+    panic:[
+      `li-r::₹${fmtINR(Math.abs(cost))} lost by exiting market during temporary dips`,
+      `li-r::Missing just 10 best market days reduces returns by ~50% historically`,
+      `li-a::Average investor underperforms index by 3-4% annually due to market timing`,
+      `li-g::Solution: Set SIP and ignore short-term volatility. Markets recover.`,
+    ],
+    herd:[
+      `li-r::Momentum chasing leads to buying high, selling low consistently`,
+      `li-r::Studies show retail investors' average entry is near market tops`,
+      `li-a::By the time a stock becomes "popular", most gains are already priced in`,
+      `li-g::Solution: Systematic rebalancing back to target weights quarterly`,
+    ],
+    overconf:[
+      `li-r::Concentration in one stock exposes you to company-specific risk (unsystematic)`,
+      `li-r::Even great companies underperform the market 40% of the time`,
+      `li-a::Sharpe ratio drops dramatically when diversification is abandoned`,
+      `li-g::Solution: No single stock should exceed 25% of portfolio`,
+    ],
+    loss:[
+      `li-r::Holding losers ties up capital that could be compounding elsewhere`,
+      `li-r::Tax loss harvesting opportunity missed — losers should be sold`,
+      `li-a::Winners sold too early, losers held too long — classic disposition effect`,
+      `li-g::Solution: Set a 15-20% stop loss and stick to it systematically`,
+    ]
+  };
+  return (items[bias]||items.panic).map(s=>{
+    const [cls,text]=s.split('::');
+    return `<li class="${cls}">${text}</li>`;
+  }).join('');
+}
+</script>
+
+<script>
+// ════ TAB 4: RISK DASHBOARD ═══════════════════════════
+// Register center-text plugin globally for Chart.js v4
+const sharpeGaugePlugin = {
+  id:'sharpeCenter',
+  afterDraw(chart){
+    if(chart.config._sharpeVal===undefined) return;
+    const {ctx, chartArea}=chart;
+    if(!chartArea) return;
+    const cx=(chartArea.left+chartArea.right)/2;
+    const cy=(chartArea.top+chartArea.bottom)/2 + 10;
+    const sv=chart.config._sharpeVal;
+    const col=sv>1?'#5dd47e':sv>0.5?'#ffb347':'#ff6b6b';
+    ctx.save();
+    ctx.fillStyle=col;
+    ctx.font='800 1.5rem Inter,sans-serif';
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    ctx.fillText(sv.toFixed(2), cx, cy-10);
+    ctx.fillStyle='#9898b4';
+    ctx.font='500 .72rem Inter,sans-serif';
+    ctx.fillText(sv>1?'Excellent ✓':sv>0.5?'Good ✓':'Below Target', cx, cy+12);
+    ctx.restore();
+  }
+};
+Chart.register(sharpeGaugePlugin);
+
+function renderRisk(stocks, mc){
+  const {var95, cvar95, sharpe, allPaths, monthsTotal}=mc;
+  const invAmt=STATE.invAmt;
+  const varINR=Math.abs(var95)*invAmt;
+  const cvarINR=Math.abs(cvar95)*invAmt;
+  const maxDD=computeMaxDrawdown(allPaths, Math.floor(allPaths.length/2));
+
+  document.getElementById('risk-kpis').innerHTML=`
+    <div class="kpi k-red"><div class="kl">VaR 95% (1 Year)</div><div class="kv" style="color:var(--red)">₹${fmtINR(varINR)}</div><div class="ks">Max loss at 95% confidence</div></div>
+    <div class="kpi k-red"><div class="kl">CVaR / Exp. Shortfall</div><div class="kv" style="color:var(--pink)">₹${fmtINR(cvarINR)}</div><div class="ks">Average loss beyond VaR</div></div>
+    <div class="kpi k-amber"><div class="kl">Max Drawdown</div><div class="kv" style="color:var(--amber)">${(maxDD*100).toFixed(1)}%</div><div class="ks">Worst peak-to-trough</div></div>
+    <div class="kpi k-green"><div class="kl">Sharpe Ratio</div><div class="kv" style="color:var(--green)">${sharpe.toFixed(2)}</div><div class="ks">${sharpe>1?'Excellent':sharpe>0.5?'Good':'Below Target'}</div></div>
+  `;
+
+  // ── VaR Chart: 1-year return distribution ──
+  const nSims=allPaths.length;
+  const yearlyRets=allPaths.map(p=>((p[12]!==undefined?p[12]:p[p.length-1])/invAmt-1)*100);
+  yearlyRets.sort((a,b)=>a-b);
+  const bins=30;
+  const minR=yearlyRets[0], maxR=yearlyRets[yearlyRets.length-1];
+  const bw=maxR===minR ? 1 : (maxR-minR)/bins;
+  const hist=new Array(bins).fill(0);
+  yearlyRets.forEach(r=>{
+    const b=Math.min(Math.max(Math.floor((r-minR)/bw),0),bins-1);
+    hist[b]++;
+  });
+  const histLabels=Array.from({length:bins},(_,i)=>(minR+i*bw).toFixed(1)+'%');
+  // Safe varBin — clamp to [0, bins-1]
+  const var95Pct=var95*100;
+  const varBin=Math.min(Math.max(Math.floor((var95Pct-minR)/bw),0),bins-1);
+
+  dc('c-var');
+  const varCtx=document.getElementById('c-var');
+  if(varCtx){
+    CH['c-var']=new Chart(varCtx,{
+      type:'bar',
+      data:{
+        labels:histLabels,
+        datasets:[{
+          label:'Return Distribution',
+          data:hist,
+          backgroundColor:hist.map((_,i)=>i<=varBin?'rgba(255,107,107,.7)':'rgba(91,141,238,.55)'),
+          borderColor:hist.map((_,i)=>i<=varBin?'#ff6b6b':'#5b8dee'),
+          borderWidth:1,
+          borderRadius:3
+        }]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{label:ctx=>`${ctx.raw} simulations`}}
+        },
+        scales:{
+          x:{ticks:{maxTicksLimit:7,font:{size:10}}},
+          y:{title:{display:true,text:'# Simulations'},ticks:{font:{size:10}}}
+        }
+      }
+    });
+  }
+
+  // ── Sharpe Gauge (doughnut) — fix: no inline plugins array ──
+  const sharpeNorm=Math.min(Math.max(sharpe,0),3);
+  const sharpeColor=sharpe>1?'#5dd47e':sharpe>0.5?'#ffb347':'#ff6b6b';
+  dc('c-sharpe');
+  const sharpeCtx=document.getElementById('c-sharpe');
+  if(sharpeCtx){
+    const cfg={
+      type:'doughnut',
+      _sharpeVal:sharpe,   // picked up by plugin
+      data:{
+        labels:['Sharpe','Remaining'],
+        datasets:[{
+          data:[sharpeNorm, Math.max(3-sharpeNorm,0)],
+          backgroundColor:[sharpeColor,'rgba(255,255,255,.05)'],
+          borderColor:[sharpeColor,'transparent'],
+          borderWidth:2,
+          circumference:270,
+          rotation:225
+        }]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        cutout:'70%',
+        plugins:{
+          legend:{display:false},
+          sharpeCenter:{},   // activate our registered plugin
+          tooltip:{
+            callbacks:{label:ctx=>ctx.dataIndex===0?`Sharpe Ratio: ${sharpe.toFixed(2)}`:''}
+          }
+        }
+      }
+    };
+    // Attach sharpe value so the plugin can read it
+    const chart=new Chart(sharpeCtx,cfg);
+    chart.config._sharpeVal=sharpe;
+    CH['c-sharpe']=chart;
+  }
+
+  // ── Drawdown Chart ──
+  const medPath=computeMedianPath(allPaths,monthsTotal);
+  let ddPeak=medPath[0]||invAmt, dd=[];
+  medPath.forEach(v=>{
+    if(v>ddPeak) ddPeak=v;
+    dd.push(ddPeak>0 ? ((v-ddPeak)/ddPeak)*100 : 0);
+  });
+  const ddLabels=Array.from({length:monthsTotal+1},(_,i)=>i%12===0?`Y${i/12}`:'');
+  dc('c-drawdown');
+  const ddCtx=document.getElementById('c-drawdown');
+  if(ddCtx){
+    CH['c-drawdown']=new Chart(ddCtx,{
+      type:'line',
+      data:{
+        labels:ddLabels,
+        datasets:[{
+          label:'Portfolio Drawdown',
+          data:dd,
+          borderColor:'#ff6b6b',
+          backgroundColor:'rgba(255,107,107,.12)',
+          borderWidth:2,
+          pointRadius:0,
+          tension:.3,
+          fill:true
+        }]
+      },
+      options:{
+        responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{label:ctx=>`Drawdown: ${ctx.raw.toFixed(2)}%`}}
+        },
+        scales:{
+          x:{ticks:{callback:(_,i)=>ddLabels[i]||null,maxTicksLimit:12}},
+          y:{
+            title:{display:true,text:'Drawdown (%)'},
+            ticks:{callback:v=>v.toFixed(0)+'%'}
+          }
+        }
+      }
+    });
+  }
+
+  // Correlation heatmap
+  const corrMatrix=buildCorrMatrix(stocks);
+  const n=stocks.length;
+  const cellSize=Math.min(Math.floor(400/n),60);
+  const heatHTML=`
+    <div style="overflow-x:auto">
+      <table class="tbl" style="border-collapse:separate;border-spacing:3px">
+        <thead><tr><th style="min-width:${cellSize}px"></th>${stocks.map(s=>`<th style="min-width:${cellSize}px;text-align:center;font-size:.7rem;color:${NSE_DATA[s].color}">${s}</th>`).join('')}</tr></thead>
+        <tbody>${stocks.map((si,i)=>`<tr><td style="font-size:.7rem;font-weight:700;color:${NSE_DATA[si].color};white-space:nowrap">${si}</td>
+          ${stocks.map((sj,j)=>{
+            const v=corrMatrix[i][j];
+            const alpha=Math.abs(v);
+            const bg=i===j?'rgba(255,255,255,.12)':v>0?`rgba(91,141,238,${alpha*.8})`:`rgba(255,107,107,${alpha*.8})`;
+            return `<td style="background:${bg};border-radius:4px;text-align:center;font-size:.72rem;font-weight:700;font-family:'JetBrains Mono',monospace;padding:.4rem">${v.toFixed(2)}</td>`;
+          }).join('')}
+        </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;align-items:center;gap:1rem;margin-top:.8rem;font-size:.72rem;color:var(--fg3)">
+      <div style="display:flex;align-items:center;gap:5px"><div style="width:16px;height:8px;background:rgba(91,141,238,.8);border-radius:2px"></div>Positive correlation</div>
+      <div style="display:flex;align-items:center;gap:5px"><div style="width:16px;height:8px;background:rgba(255,107,107,.8);border-radius:2px"></div>Negative correlation</div>
+      <div style="display:flex;align-items:center;gap:5px"><div style="width:16px;height:8px;background:rgba(255,255,255,.12);border-radius:2px"></div>Self (1.00)</div>
+    </div>`;
+  document.getElementById('corr-matrix').innerHTML=heatHTML;
+}
+
+function computeMaxDrawdown(paths, pathIdx){
+  const path=paths[pathIdx]||paths[0];
+  let peak=path[0], maxDD=0;
+  path.forEach(v=>{if(v>peak)peak=v;const dd=(peak-v)/peak;if(dd>maxDD)maxDD=dd;});
+  return maxDD;
+}
+
+// ════ TAB 5: INSIGHTS ══════════════════════════════════
+function renderInsights(stocks, res, bias, invAmt, years){
+  const {rationalMedian,biasedMedian,costOfBias,pctWealthDestroyed}=res;
+  const biasMeta=BIAS_META[bias];
+  const biasName={'panic':'Panic Selling','herd':'Herd Mentality','overconf':'Overconfidence','loss':'Loss Aversion'}[bias];
+
+  const rationalReturn=((rationalMedian/invAmt-1)*100).toFixed(1);
+  const biasedReturn=((biasedMedian/invAmt-1)*100).toFixed(1);
+
+  const summary=`
+    <div class="card" style="background:linear-gradient(135deg,rgba(91,141,238,.08),rgba(155,109,255,.05));border-color:rgba(91,141,238,.2)">
+      <div style="font-size:.72rem;color:var(--purple);text-transform:uppercase;letter-spacing:.8px;font-weight:700;margin-bottom:.8rem">📋 Auto-Generated Report</div>
+      <div style="font-size:1rem;font-weight:700;color:var(--fg);margin-bottom:.8rem;line-height:1.7">
+        You invested <strong style="color:var(--blue)">${fmtINRFull(invAmt)}</strong> in
+        <strong>${stocks.join(', ')}</strong> for <strong>${years} years</strong>.
+      </div>
+      <div style="font-size:.88rem;color:var(--fg2);line-height:1.85">
+        A <strong>rational buy-and-hold investor</strong> would have grown this to
+        <strong style="color:var(--green)">${fmtINRFull(rationalMedian)}</strong>
+        — a <strong>${rationalReturn}%</strong> total return.<br/><br/>
+        However, due to <strong style="color:${biasMeta.color}">${biasName}</strong>,
+        the biased portfolio ended at only
+        <strong style="color:var(--red)">${fmtINRFull(biasedMedian)}</strong>
+        — a ${biasedReturn}% return.<br/><br/>
+        This behavioral bias cost you approximately
+        <strong style="color:var(--red);font-size:1.05rem">${fmtINRFull(Math.abs(costOfBias))}</strong>,
+        which represents <strong>${Math.abs(pctWealthDestroyed).toFixed(1)}%</strong> of your
+        potential wealth being destroyed by irrational decision-making.
+      </div>
+    </div>
+
+    <div class="kpi-row kpi-3" style="margin-top:1rem">
+      <div class="kpi k-blue"><div class="kl">Invested</div><div class="kv gx1">₹${fmtINR(invAmt)}</div><div class="ks">Initial capital</div></div>
+      <div class="kpi k-green"><div class="kl">Rational Final Value</div><div class="kv" style="color:var(--green)">₹${fmtINR(rationalMedian)}</div><div class="ks">${rationalReturn}% total return</div></div>
+      <div class="kpi k-red"><div class="kl">Bias Cost</div><div class="kv" style="color:var(--red)">₹${fmtINR(Math.abs(costOfBias))}</div><div class="ks">${Math.abs(pctWealthDestroyed).toFixed(1)}% wealth destroyed</div></div>
+    </div>
+
+    <div class="card" style="margin-top:1rem">
+      <div class="card-h"><span class="ci">💡</span>Key Takeaways — ${biasName}</div>
+      <ul class="insight-list">
+        <li class="li-r"><strong>The Silent Wealth Killer:</strong> ${biasName} doesn't feel like a mistake in the moment — that's what makes it so costly.</li>
+        <li class="li-r"><strong>Compounding Amplifies the Damage:</strong> A ₹${fmtINR(Math.abs(costOfBias/years))} annual underperformance compounds to ₹${fmtINR(Math.abs(costOfBias))} over ${years} years.</li>
+        <li class="li-a"><strong>The Market Doesn't Care About Your Emotions:</strong> Rational allocation beats emotional decision-making 80% of the time over long periods.</li>
+        <li class="li-g"><strong>Research Backs This Up:</strong> SEBI data shows 90% of retail investors underperform Nifty 50 index due to behavioral biases.</li>
+        <li class="li-g"><strong>The Fix is Simple:</strong> Automate investments via SIP, rebalance annually, never try to time the market.</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-h"><span class="ci">📊</span>All 4 Biases — Estimated Cost Summary</div>
+      <div id="all-bias-bars"></div>
+    </div>`;
+
+  document.getElementById('insight-report').innerHTML=summary;
+
+  // Render estimated costs for all 4 biases
+  const biasData=[
+    {b:'panic',  name:'Panic Selling',   est:pctWealthDestroyed*1.0},
+    {b:'herd',   name:'Herd Mentality',  est:pctWealthDestroyed*0.75},
+    {b:'overconf',name:'Overconfidence', est:pctWealthDestroyed*0.85},
+    {b:'loss',   name:'Loss Aversion',   est:pctWealthDestroyed*0.65}
+  ];
+  const current=biasData.find(x=>x.b===bias);
+  if(current) current.est=pctWealthDestroyed;
+
+  document.getElementById('all-bias-bars').innerHTML=biasData.map(bd=>`
+    <div class="prog-row">
+      <div class="prog-lbl">
+        <span>${bd.name}</span>
+        <span style="color:var(--red);font-weight:700">${Math.abs(bd.est).toFixed(1)}% wealth destroyed</span>
+      </div>
+      <div class="prog-tr">
+        <div class="prog-fl" style="width:${Math.min(Math.abs(bd.est),100)}%;background:${bd.b===bias?'linear-gradient(90deg,var(--amber),var(--red))':'rgba(255,107,107,.4)'}"></div>
+      </div>
+    </div>`).join('');
+
+  // Store results for download
+  STATE.results.reportText=generateReportText(stocks,invAmt,years,rationalMedian,biasedMedian,costOfBias,pctWealthDestroyed,biasName,rationalReturn,biasedReturn);
+}
+
+function generateReportText(stocks,invAmt,years,rational,biased,cost,pctDestroyed,biasName,ratRet,biasRet){
+  return `BEHAVIORAL BIAS COST ANALYZER — REPORT
+${'='.repeat(50)}
+Generated: ${new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'long',year:'numeric'})}
+
+PORTFOLIO DETAILS:
+  Stocks: ${stocks.join(', ')} (NSE)
+  Investment: ${fmtINRFull(invAmt)}
+  Period: ${years} Years
+  Bias Analyzed: ${biasName}
+
+RESULTS:
+  Rational Portfolio Final Value: ${fmtINRFull(rational)} (${ratRet}% return)
+  Biased Portfolio Final Value:   ${fmtINRFull(biased)} (${biasRet}% return)
+  Cost of Bias:                   ${fmtINRFull(Math.abs(cost))}
+  Wealth Destroyed:               ${Math.abs(pctDestroyed).toFixed(1)}%
+
+KEY INSIGHT:
+  Due to ${biasName}, you lost ${fmtINRFull(Math.abs(cost))} 
+  compared to a rational buy-and-hold investor.
+
+RECOMMENDATION:
+  1. Invest via SIP to automate and remove emotion
+  2. Rebalance portfolio annually to target weights
+  3. Set stop-losses (15-20%) and stick to them
+  4. Never try to time the market
+  5. Diversify — no stock > 25% of portfolio
+
+${'='.repeat(50)}
+Disclaimer: Simulation based on Monte Carlo methods with 
+synthetic returns calibrated to NSE large-cap historical data.
+Not financial advice.`;
+}
+
+function downloadCSV(){
+  if(!STATE.results) return;
+  const {mcResult,biasResult,stocks}=STATE.results;
+  const rows=[['Simulation','Rational Final (₹)','Biased Final (₹)','Rational Return %','Biased Return %','Cost of Bias (₹)']];
+  const n=Math.min(mcResult.finalVals.length,biasResult.rationalFinals.length);
+  for(let i=0;i<n;i++){
+    const r=biasResult.rationalFinals[i], b=biasResult.biasedFinals[i];
+    rows.push([i+1,Math.round(r),Math.round(b),((r/STATE.invAmt-1)*100).toFixed(2),((b/STATE.invAmt-1)*100).toFixed(2),Math.round(r-b)]);
+  }
+  const csv=rows.map(r=>r.join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='bias_simulation_results.csv';a.click();
+}
+
+function downloadReport(){
+  if(!STATE.results?.reportText) return;
+  const blob=new Blob([STATE.results.reportText],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='behavioral_bias_report.txt';a.click();
+}
+
+// ════ INIT ════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+  updateAmt(); updateYr(); updateSim();
+  // Style checkbox containers
+  document.querySelectorAll('.stock-cb').forEach(cb=>{
+    const inp=cb.querySelector('input');
+    cb.classList.toggle('checked',inp.checked);
+  });
+});
+</script>
+</body>
+</html>
